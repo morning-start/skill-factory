@@ -1,16 +1,21 @@
 ---
 name: skill-factory
-version: v0.2.0
+version: v0.3.0
 author: skill-factory
-description: 技能工厂 v2 - 全生命周期管理系统，**三层架构**（工厂根→阶段协调器→执行者），覆盖生产、加工、发布、销毁四阶段，基于轻/重/薄/厚四维分类
-tags: [skill-factory, lifecycle, three-layer-architecture, production, processing, publishing, destruction, four-dimensions]
+description: 技能工厂 v3 - 全生命周期管理系统，**严格遵循三层架构铁律**（工厂根→阶段协调器→执行者），**层级深度≤3层**，覆盖生产、加工、发布、销毁四阶段，基于轻/重/薄/厚四维分类
+tags: [skill-factory, lifecycle, three-layer-architecture, max-three-layers, production, processing, publishing, destruction, four-dimensions, layer-constraint]
 dependency:
   parent: none
   architecture:
     layers: 3
+    max_layers_allowed: 3  # ⚠️ 铁律：严禁超过三层
     layer_0: "skill-factory (工厂根)"
     layer_1: "phase-coordinators (4个阶段协调器)"
     layer_2: "workers (13个执行者)"
+  core_principle:
+    name: "三层架构铁律"
+    definition: "所有技能创建必须遵循最多三层的层级关系"
+    enforcement: "自动检测 + 用户确认机制"
   phases:
     - production (5 workers)
     - processing (4 workers)
@@ -31,7 +36,122 @@ dependency:
 
 ---
 
-## 工厂全景架构（三层结构 v0.2.0）
+## ⚖️ 三层架构铁律（Core Principle v0.3.0）
+
+> **核心理念**：所有技能创建的层级关系推荐为 **最多三层**。这是 skill-factory 的设计哲学基石。
+
+### 铁律定义
+
+```mermaid
+flowchart LR
+    subgraph 铁律 ["⚖️ 三层架构铁律"]
+        direction TB
+        L0["Layer 0: 工厂根<br/>（入口/编排）"]
+        L1["Layer 1: 协调器<br/>（调度/管控）"]
+        L2["Layer 2: 执行者<br/>（操作/实现）"]
+        
+        L0 --> L1 --> L2
+        
+        MAX["🛑 层级深度 ≤ 3"]
+    end
+    
+    style MAX fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c,stroke-width:3px
+    style 铁律 fill:#fff9c4,stroke:#fbc02d,color:#f57f17,stroke-width:2px
+```
+
+### 三层结构标准模板
+
+| 层级 | 命名规范 | 职责特征 | 典型数量 |
+|------|---------|---------|---------|
+| **Layer 0** | `{skill-name}` | 全局入口、跨层编排 | 1 个 |
+| **Layer 1** | `phase-{name}` 或 `{domain}-coordinator` | 阶段调度、质量门禁 | 2-6 个 |
+| **Layer 2** | `{specific-worker}` | 单一职责操作 | 5-20+ 个 |
+
+### 为什么是三层？
+
+```mermaid
+mindmap
+  root((为什么最多三层?))
+    认知科学
+      米勒定律 7±2
+      三层最佳平衡点
+      降低认知负担
+    软件工程
+      模块化原则
+      单一职责
+      高内聚低耦合
+    实践验证
+      50+技能可扩展性
+      维护成本可控
+      新用户易上手
+    架构美学
+      目录即文档
+      自解释结构
+      符合直觉
+```
+
+### 层级深度计算方法
+
+```
+计算规则：
+- 从技能根目录（SKILL.md）开始计数
+- 每深入一级子目录 +1
+- references/ 和 scripts/ 不算层级（辅助资源）
+
+示例：
+✅ skill-factory/SKILL.md                              = Layer 0 (1层)
+✅ skills/phase-production/SKILL.md                     = Layer 1 (2层)
+✅ skills/phase-production/researcher/SKILL.md          = Layer 2 (3层) ✓
+❌ skills/phase-production/researcher/sub-worker/SKILL.md = Layer 3 (4层) ✗ 违规！
+```
+
+### 强制执行机制
+
+```mermaid
+flowchart TD
+    A[开始创建技能] --> B{层级深度检测}
+    
+    B -->|≤3层| C[✅ 继续创建]
+    B -->|4层| D[🛑 触发超层机制]
+    B -->|≥5层| E[🚨 严重警告]
+    
+    D --> F{是否真的需要?}
+    
+    F -->|可以拆分| G["方案A: 拆为多个<br/>3层内的独立技能"]
+    F -->|确实需要| H["方案B: 征求用户同意<br/>+ 记录特殊原因"]
+    
+    H --> I{用户同意?}
+    I -->|是| J[⚠️ 创建并标记]
+    I -->|否| K[重新设计]
+    
+    style C fill:#a5d6a7,stroke:#2e7d32,color:#ffffff
+    style G fill:#a5d6a7,stroke:#2e7d32,color:#ffffff
+    style J fill:#fff9c4,stroke:#fbc02d,color:#f57f17
+    style K fill:#ffcc80,stroke:#ef6c00,color:#e65100
+    style D fill:#ef9a9a,stroke:#c62828,color:#b71c1c
+    style E fill:#ef5350,stroke:#d32f2f,color:#ffffff
+```
+
+### 违规处理策略
+
+| 层级深度 | 处置方式 | 是否需要确认 |
+|---------|---------|------------|
+| **1-3层** | ✅ 正常流程 | 否 |
+| **4层** | ⚠️ 先尝试拆分，若无法拆分则征求用户同意 | **是** |
+| **≥5层** | 🚨 必须重新设计，强制拆分为多个技能 | **必须** |
+
+### 常见的"假性超三层"场景
+
+| 场景 | 实际情况 | 正确做法 |
+|------|---------|---------|
+| 技能有多个子功能 | 功能复杂但可拆分 | 使用 **重+薄** 技能族模式（仍在3层内） |
+| 需要引用外部文档 | 内容丰富 | 放入 `references/` （**不算层级**） |
+| 有配置文件/脚本 | 辅助资源 | 同级目录存放（**不算层级**） |
+| 动态加载模块 | 运行时行为 | 在 SKILL.md 内描述逻辑（不增加物理层级） |
+
+---
+
+## 工厂全景架构（三层结构 v0.3.0）
 
 ```mermaid
 flowchart TB
@@ -42,7 +162,7 @@ flowchart TB
 
     subgraph L1["Layer 1: 阶段协调器 (Phase Coordinators) ×4"]
         direction LR
-        
+
         subgraph PH1["① production 生产协调器"]
             P1_C["⚙️ 协调5步流水线"]
         end
@@ -62,7 +182,7 @@ flowchart TB
 
     subgraph L2["Layer 2: 执行者 (Workers) ×13"]
         direction LR
-        
+
         subgraph W1["生产 (5人)"]
             R[researcher]
             A[analyzer]
@@ -97,16 +217,21 @@ flowchart TB
     PH3 --> W3
     PH4 --> W4
 
+    MAX_DEPTH["🛑 最大深度: 3层<br/>⚠️ 严禁超过!"]
+
     style L0 fill:#f3e5f5,stroke:#9c27b0,color:#4a148c,stroke-width:3px
     style L1 fill:#e8eaf6,stroke:#3f51b5,color:#1a237e,stroke-width:2px
     style L2 fill:#fafafa,stroke:#9e9e9e,color:#212121
-    
+
     style ROOT fill:#ce93d8,stroke:#7b1fa2,color:#ffffff,stroke-width:2px
     style P1_C fill:#a5d6a7,stroke:#388e3c,color:#1b5e20
     style P2_C fill:#ffe0b2,stroke:#fb8c00,color:#e65100
     style P3_C fill:#90caf9,stroke:#1976d2,color:#0d47a1
     style P4_C fill:#ef9a9a,stroke:#c62828,color:#b71c1c
+    style MAX_DEPTH fill:#ffcdd2,stroke:#d32f2f,color:#b71c1c,stroke-width:3px
 ```
+
+> ⚠️ **层级警示**：本架构严格遵循三层铁律。Layer 2（执行者）为最深层级，**禁止在执行者下再创建子层级**。
 
 ### 三层职责定义
 
@@ -184,14 +309,16 @@ flowchart TB
 
 从零创建新技能的完整流水线。
 
+> ⚠️ **三层铁律检查点**：生产阶段是层级控制的第一道防线，planner 和 generator 必须严格执行层级深度检测。
+
 ```mermaid
 flowchart LR
     A[用户输入] --> R[researcher 信息研究]
     R --> N[需求文档]
     N --> AN[analyzer 技术分析]
-    AN --> PL[planner 类型判定]
-    PL --> GE[generator 按类型生成]
-    GE --> PA[packager 结构验证]
+    AN --> PL["planner 类型判定<br/>+ 🛑 层级深度预检"]
+    PL --> GE["generator 按类型生成<br/>+ ⚠️ 层级合规验证"]
+    GE --> PA["packager 结构验证<br/>+ ✅ 最终层级确认"]
     PA --> OUT[技能包]
 
     style A fill:#f5f5f5,color:#424242
@@ -222,9 +349,9 @@ flowchart LR
 |--------|------|------|
 | [researcher](skills/skill-factory-phase-production/skill-factory-researcher/SKILL.md) | 接收输入、交互确认、补充信息 | 六步研究流程 + 回调机制 (≤3次+冷却) |
 | [analyzer](skills/skill-factory-phase-production/skill-factory-analyzer/SKILL.md) | 提取技术信息、评估体量 | 完整度 >= 80% 判定 |
-| [planner](skills/skill-factory-phase-production/skill-factory-planner/SKILL.md) | 判定轻重薄厚四维分类 | 两步决策树 → Type 1-4 |
-| [generator](skills/skill-factory-phase-production/skill-factory-generator/SKILL.md) | 按四种类型生成文件 | A/B/C/D 四种模板 |
-| [packager](skills/skill-factory-phase-production/skill-factory-packager/SKILL.md) | 验证对应结构的完整性 | 四种验证模式 + **快速验证** (Type1) |
+| [planner](skills/skill-factory-phase-production/skill-factory-planner/SKILL.md) | 判定轻重薄厚四维分类 + **层级深度预检** | 两步决策树 → Type 1-4 + **层级合规性评估** |
+| [generator](skills/skill-factory-phase-production/skill-factory-generator/SKILL.md) | 按四种类型生成文件 + **层级结构生成** | A/B/C/D 四种模板 + **确保输出≤3层** |
+| [packager](skills/skill-factory-phase-production/skill-factory-packager/SKILL.md) | 验证对应结构的完整性 + **最终层级确认** | 四种验证模式 + **快速验证** (Type1) + **层级深度校验** |
 
 **⚙️ ② 加工阶段 (4 人)** - 协调器: [phase-processing](skills/skill-factory-phase-processing/SKILL.md)
 
@@ -263,20 +390,22 @@ flowchart LR
 
 对已有技能进行加工处理，类比工厂的精加工车间。
 
+> ⚠️ **三层铁律优化点**：加工阶段是维护层级合规的关键环节。当技能过于复杂时，应优先考虑**拆分为多个符合三层规范的独立技能**，而非增加层级深度。
+
 ```mermaid
 flowchart TD
     Input[已有技能] --> Operation{加工类型?}
-    
+
     Operation -->|内容不够| E[enricher 丰富]
     Operation -->|内容太多| S[simplifier 简化]
     Operation -->|可读性差| B[beautifier 美化]
     Operation -->|格式不规范| T[standardizer 规范]
-    
+
     Operation -->|多个要合并| I[整合模式]
-    Operation -->|太复杂要拆| D[拆分模式]
-    
+    Operation -->|太复杂要拆| D["拆分模式<br/>+ 🛑 确保拆分后≤3层"]
+
     E & S & B & T --> Output[加工后技能]
-    
+
     style Input fill:#fff3e0,stroke:#ff9800,color:#e65100
     style E fill:#ffe0b2,stroke:#fb8c00,color:#e65100
     style S fill:#ffe0b2,stroke:#fb8c00,color:#e65100
@@ -307,7 +436,7 @@ flowchart TD
 | 合并重复 | 去除重复描述 | 行数减少 |
 | 精炼语言 | 压缩冗余表述 | 行数减少 |
 | 提取摘要 | 主文件保留概览 | 厚→薄（可能）|
-| 原子拆分 | 复杂技能拆为简单子技能 | 重→多轻 |
+| 原子拆分 | 复杂技能拆为简单子技能 | 重→多轻（**确保每个子技能≤3层**） |
 
 ### 2.3 美化器（Beautifier）
 
@@ -351,10 +480,13 @@ flowchart TD
 
 ```
 复杂技能 (重+厚) → 技能A (轻+薄) + 技能B (轻+厚) + 技能C (轻+薄)
+                  ↑
+            每个输出必须 ≤3层
 ```
 
 - 对应原 scenario-decompose
 - 拆分维度: 功能/场景/复杂度
+- **三层铁律约束**: 拆分后的每个子技能必须独立符合三层架构规范
 - 迁移策略: 并行维护 → deprecated → 退役
 
 ### 典型场景映射
@@ -525,7 +657,184 @@ flowchart TD
 
 ---
 
-## 发布路径选择 (Release Path Selection) - v0.2.0 新增
+## 🚨 超三层处理流程（SOP v0.3.0）
+
+> **当检测到需要创建超过三层的技能时，必须严格执行本流程**。
+
+### 触发条件
+
+```yaml
+触发场景:
+  - planner 预检发现需求需要 ≥4层才能完整表达
+  - generator 生成过程中发现输出结构会超过3层
+  - packager 验证时检测到层级深度 > 3
+  - 用户主动提出需要深层级结构的需求
+
+自动检测机制:
+  - 每个生产阶段节点内置层级计数器
+  - 目录深度实时监控（从根 SKILL.md 开始）
+  - references/ 和 scripts/ 排除在计数外
+```
+
+### 标准处理流程
+
+```mermaid
+flowchart TD
+    START[检测到超三层需求] --> STEP1[Step 1: 暂停创建]
+
+    STEP1 --> STEP2[Step 2: 分析根因]
+    STEP2 --> ANALYSIS{为什么需要>3层?}
+
+    ANALYSIS -->|功能过于复杂| ROOT1["根因: 单体技能<br/>承载过多职责"]
+    ANALYSIS -->|领域嵌套过深| ROOT2["根因: 领域模型<br/>层次过于细化"]
+    ANALYSIS -->|设计过度| ROOT3["根因: 过度工程化<br/>不必要的抽象"]
+
+    ROOT1 & ROOT2 & ROOT3 --> STEP3[Step 3: 尝试拆分方案]
+
+    STEP3 --> SPLIT{能否拆分为<br/>多个≤3层的技能?}
+
+    SPLIT -->|能| SOLUTION_A["✅ 方案A: 技能族模式<br/>推荐优先使用"]
+    SPLIT -->|不能/不确定| STEP4[Step 4: 征求用户同意]
+
+    SOLUTION_A --> IMPLEMENT_A[执行拆分<br/>确保每个子技能≤3层]
+    IMPLEMENT_A --> DONE[✅ 完成]
+
+    STEP4 --> USER_CONSENT[向用户说明情况]
+    USER_CONSENT --> CONSENT{用户是否同意<br/>创建超三层技能?}
+
+    CONSENT -->|同意| SOLUTION_B["⚠️ 方案B: 有条件创建<br/>+ 特殊标记"]
+    CONSENT -->|不同意| REDESIGN[重新设计架构]
+
+    SOLUTION_B --> IMPLEMENT_B[创建并添加<br/>超层特殊标记]
+    REDESIGN --> STEP3
+
+    style START fill:#ef5350,stroke:#d32f2f,color:#ffffff
+    style DONE fill:#a5d6a7,stroke:#2e7d32,color:#ffffff
+    style SOLUTION_A fill:#a5d6a7,stroke:#2e7d32,color:#ffffff
+    style SOLUTION_B fill:#fff9c4,stroke:#fbc02d,color:#f57f17
+    style REDESIGN fill:#ffcc80,stroke:#ef6c00,color:#e65100
+```
+
+### 详细步骤说明
+
+#### Step 1-2: 暂停与分析
+
+| 步骤 | 操作 | 输出 |
+|------|------|------|
+| **暂停** | 立即停止当前创建流程，不生成任何文件 | 系统暂停状态 |
+| **分析** | 识别导致超层的根本原因 | 根因报告（功能复杂/领域嵌套/过度设计） |
+
+#### Step 3: 拆分方案设计（首选）
+
+**方案 A：技能族模式（推荐）**
+
+```
+❌ 超三层结构 (禁止):
+skill-name/
+└── skills/
+    └── phase-1/
+        └── worker/
+            └── sub-worker/     ← 第4层！违规！
+                └── SKILL.md
+
+✅ 拆分为技能族 (推荐):
+skill-name/                          ← Layer 0: 工厂根
+├── SKILL.md
+└── skills/
+    ├── skill-a/                    ← Layer 2: 独立技能A (轻+薄)
+    │   └── SKILL.md               ← 总共3层 ✓
+    ├── skill-b/                    ← Layer 2: 独立技能B (轻+厚)
+    │   ├── SKILL.md
+    │   └── references/            ← 不算层级
+    └── skill-c/                    ← Layer 2: 独立技能C (轻+薄)
+        └── SKILL.md               ← 总共3层 ✓
+```
+
+**拆分决策树：**
+
+```mermaid
+flowchart LR
+    A[复杂需求] --> B{可按功能拆分?}
+    
+    B -->|是| C["按功能模块拆分<br/>每个模块独立成技能"]
+    B -->|否| D{可按场景拆分?}
+    
+    D -->|是| E["按使用场景拆分<br/>场景内聚"]
+    D -->|否| F{可按用户角色拆分?}
+    
+    F -->|是| G["按目标用户拆分<br/>角色隔离"]
+    F -->|否| H["⚠️ 进入Step 4<br/>征求用户同意"]
+    
+    style C fill:#a5d6a7,stroke:#2e7d32,color:#ffffff
+    style E fill:#a5d6a7,stroke:#2e7d32,color:#ffffff
+    style G fill:#a5d6a7,stroke:#2e7d32,color:#ffffff
+    style H fill:#fff9c4,stroke:#fbc02d,color:#f57f17
+```
+
+#### Step 4: 用户确认流程（备选）
+
+当且仅当**无法拆分**或**拆分成本过高**时，才进入此步骤：
+
+**必须向用户说明的内容：**
+
+```markdown
+## ⚠️ 超三层架构申请
+
+### 当前情况
+- 计划层级深度：{N} 层
+- 三层铁律限制：≤3 层
+- 超出层数：{N-3} 层
+
+### 尝试过的拆分方案
+1. {方案1描述} → 结果：{为何不可行}
+2. {方案2描述} → 结果：{为何不可行}
+
+### 申请理由
+{详细说明为什么必须使用超三层结构}
+
+### 承诺与标记
+- ✅ 同意在 SKILL.md 中添加 `depth: {N}` 标记
+- ✅ 同意添加 `warning: 超三层架构` 警示
+- ✅ 承担未来维护成本增加的风险
+
+### 请求确认
+请确认是否同意创建此超三层技能？[是/否]
+```
+
+**如果用户同意：**
+
+```yaml
+# 必须在 SKILL.md 前言区添加的特殊标记
+---
+name: {skill-name}
+version: v0.1.0
+depth: 4  # ⚠️ 超出三层铁律限制
+layer-warning: "本技能采用 {N} 层架构，已获得用户特别授权"
+authorization:
+  date: "{YYYY-MM-DD}"
+  reason: "{授权原因}"
+  user-confirmed: true
+---
+```
+
+**如果用户不同意：**
+
+→ 返回 Step 3，重新设计更激进的拆分方案，或简化需求范围。
+
+### 处理结果记录
+
+无论最终采用哪种方案，都必须在技能的 metadata 中记录：
+
+| 字段 | 说明 |
+|------|------|
+| `layer_check_date` | 层级检查日期 |
+| `layer_depth` | 最终采用的层级数 |
+| `layer_decision` | 决策结果（normal/split/authorized） |
+| `layer_note` | 处理过程备注 |
+
+---
+
+## 发布路径选择 (Release Path Selection) - v0.3.0 新增
 
 ### 路径矩阵
 
