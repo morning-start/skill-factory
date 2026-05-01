@@ -23,6 +23,3 @@ desktop.ini
 *.tmp
 *.temp
 *.bak
-
-# 注意：docs/ 和 tests/ 是项目核心文档，不应忽略！
-repo-analysis
