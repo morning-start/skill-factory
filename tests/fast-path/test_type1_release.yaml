@@ -1,0 +1,144 @@
+name: Fast Path Integration Test
+version: v0.2.0
+description: Type 1 快速发布路径的端到端集成测试
+
+scenario:
+  name: "创建一个简单的 git-commit 技能（Type 1）"
+  type: "light-thin"
+  expected_time: "< 40min"
+
+steps:
+  - step: 1
+    name: "输入"
+    action: "提供 URL"
+    input:
+      url: "https://git-scm.com/doc/git-commit"
+    expected:
+      researcher_mode: "fast_research"
+      estimated_time: "~10min"
+
+  - step: 2
+    name: "Researcher（快速模式）"
+    action: "信息收集"
+    input:
+      mode: "type_1_fast"
+      checks: "仅必填项（技术名称、官方文档）"
+      questions: "1-2个关键问题"
+    expected:
+      output: "简化需求文档"
+      time: "<= 10min"
+      callback_count: 0
+
+  - step: 3
+    name: "Analyzer"
+    action: "技术分析"
+    input:
+      skill_type: "single-function"
+      estimated_lines: "<300"
+    expected:
+      analysis_result: "单一功能，预计<300行"
+      time: "~5min"
+
+  - step: 4
+    name: "Planner"
+    action: "类型判定"
+    input:
+      function_dimension: "light (单一功能)"
+      content_dimension: "thin (<300行)"
+    expected:
+      type_decision: "Type 1 (light-thin)"
+      path_selection: "🚀 Fast Path"
+      time: "~5min"
+
+  - step: 5
+    name: "Generator"
+    action: "生成文件"
+    input:
+      template: "Type A (单文件)"
+      output_structure: "单个 SKILL.md"
+    expected:
+      output_file: "git-commit/SKILL.md"
+      line_count: "<300"
+      time: "~5min"
+
+  - step: 6
+    name: "Packager（快速验证）"
+    action: "结构验证"
+    input:
+      validation_mode: "quick_check"
+      threshold: 80
+      checks:
+        - frontmatter_exists
+        - single_file_valid
+        - description_length_ok
+        - at_least_2_examples
+    expected:
+      quality_score: ">= 80"
+      validation_time: "~3min"
+      result: "通过 → 直接进入发布"
+
+  - step: 7
+    name: "⏭️ 跳过加工阶段"
+    action: "确认跳过"
+    input:
+      skipped_stages:
+        - enricher
+        - simplifier
+        - beautifier
+        - standardizer
+    expected:
+      skip_confirmed: true
+      reason: "Type 1 fast path optimization"
+
+  - step: 8
+    name: "Publisher-Version"
+    action: "版本管理"
+    input:
+      current_version: "v0.1.0"
+      mode: "type_1_fast"
+      change_type: "initial_release"
+    expected:
+      new_version: "v0.1.0"  # 首次创建保持 v0.1.0
+      versioning_time: "~2min"
+
+  - step: 9
+    name: "Publisher-Metadata"
+    action: "元数据更新"
+    input:
+      mode: "type_1_fast"
+      auto_generate_tags: true
+    expected:
+      description_length: "100-150字符"
+      tags_count: ">=3"
+      metadata_time: "~2min"
+
+  - step: 10
+    name: "Publisher-Release"
+    action: "发布执行"
+    input:
+      mode: "type_1_fast"
+      commit_message_auto: true
+      tag_optional: true
+    expected:
+      commit_success: true
+      release_time: "~3min"
+
+expected_results:
+  total_time: "< 40min"
+  output_files:
+    - "git-commit/SKILL.md"
+  quality_score: ">= 80"
+  no_processing_stage: true
+  efficiency_improvement: ">85% vs standard path"
+
+test_metadata:
+  created_at: 2026-05-01
+  coverage_target: "fast_path_integration"
+  priority: P0
+  related_task: T2.3
+  acceptance_criteria:
+    - 端到端流程在40分钟内完成
+    - Type 1 判定正确
+    - 加工阶段成功跳过
+    - Packager 快速验证通过
+    - 发布成功完成
