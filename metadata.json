@@ -1,1 +1,271 @@
-{"name": "skill-factory", "version": "v0.1.0", "description": "技能工厂 v2 - 全生命周期管理系统，覆盖生产、加工、发布、销毁四阶段，基于轻/重/薄/厚四维分类，共 13 个子技能", "author": "skill-factory", "tags": ["skill-factory", "lifecycle", "production", "processing", "publishing", "destruction", "four-dimensions"], "parent": null, "phases": ["production", "processing", "publishing", "destruction"], "children": [{"name": "skill-factory-researcher", "version": "v0.1.0", "phase": "production", "description": "信息研究员，负责接收输入、交互确认、补充缺失信息"}, {"name": "skill-factory-analyzer", "version": "v0.1.0", "phase": "production", "description": "技术内容分析器"}, {"name": "skill-factory-planner", "version": "v0.1.0", "phase": "production", "description": "技能规划器，基于轻重薄厚四维分类判定类型"}, {"name": "skill-factory-generator", "version": "v0.1.0", "phase": "production", "description": "技能生成器，支持四种输出模式"}, {"name": "skill-factory-packager", "version": "v0.1.0", "phase": "production", "description": "技能打包器，支持四种结构验证"}, {"name": "skill-factory-enricher", "version": "v0.1.0", "phase": "processing", "description": "技能丰富器，补充示例、references、能力、Mermaid 图表"}, {"name": "skill-factory-simplifier", "version": "v0.1.0", "phase": "processing", "description": "技能简化器，合并去重、语言精炼、摘要提取、原子拆分"}, {"name": "skill-factory-beautifier", "version": "v0.1.0", "phase": "processing", "description": "技能美化器，添加 Mermaid 图表、优化排版、配色统一、导航增强"}, {"name": "skill-factory-standardizer", "version": "v0.1.0", "phase": "processing", "description": "技能规范化器，前言区校准、命名规范、必备章节、链接检查"}, {"name": "skill-factory-publisher-version", "version": "v0.1.0", "phase": "publishing", "description": "版本管理器，语义化版本和类型变更判定"}, {"name": "skill-factory-publisher-metadata", "version": "v0.1.0", "phase": "publishing", "description": "元数据管理器，维护 description/tags/dependency 一致性"}, {"name": "skill-factory-publisher-release", "version": "v0.1.0", "phase": "publishing", "description": "发布执行器，git commit 和 tag 操作"}, {"name": "skill-factory-destroyer", "version": "v0.1.0", "phase": "destruction", "description": "技能销毁器，退役标记、迁移指引编写、归档清理"}], "pipeline": {"phase_1_production": {"name": "生产 Production", "description": "从零创建新技能的完整流水线", "steps": [{"step": 1, "skill": "skill-factory-researcher", "capabilities": ["接收输入(URL/文件夹)", "初步浏览内容", "用户交互确认需求", "网络搜索补充资源", "输出完整需求文档"]}, {"step": 2, "skill": "skill-factory-analyzer", "capabilities": ["提取技术信息", "评估功能数量和内容体量"]}, {"step": 3, "skill": "skill-factory-planner", "capabilities": ["判定轻重薄厚四维分类", "选择输出结构"]}, {"step": 4, "skill": "skill-factory-generator", "capabilities": ["按四种类型生成文件"]}, {"step": 5, "skill": "skill-factory-packager", "capabilities": ["验证结构完整性"]}]}, "phase_2_processing": {"name": "加工 Processing", "description": "对已有技能进行加工处理", "skills": {"enricher": {"operations": ["补充示例", "添加 references", "扩展能力", "添加 Mermaid 图表"], "effect": ["可能 薄→厚", "可能 轻→重"]}, "simplifier": {"operations": ["合并去重", "语言精炼", "摘要提取(薄化)", "原子拆分(轻量化)"], "effect": ["可能 厚→薄", "可能 重→多轻"]}, "beautifier": {"operations": ["Mermaid 图表增强", "排版优化", "配色统一", "导航增强"], "effect": ["可读性提升"]}, "standardizer": {"operations": ["前言区校准", "命名规范检查", "必备章节验证", "链接有效性检查"], "effect": ["质量达标"]}, "special_modes": {"assembly": "整合模式 - 多技能合并为技能族", "disassembly": "拆分模式 - 复杂技能拆分为多个简单技能"}}}, "phase_3_publishing": {"name": "发布 Publishing", "description": "版本管理和正式发布", "steps": [{"step": 1, "skill": "skill-factory-publisher-version", "capabilities": ["判定变更类型(breaking/type-upgrade/feature/fix)", "决定版本号递增策略"]}, {"step": 2, "skill": "skill-factory-publisher-metadata", "capabilities": ["更新 description (100-150字符)", "更新 tags (>=3个)", "更新 dependency (parent/children/requires)"]}, {"step": 3, "skill": "skill-factory-publisher-release", "capabilities": ["git add 暂存", "git commit 提交", "git tag 打标签", "推送代码和标签"]}]}, "phase_4_destruction": {"name": "销毁 Destruction", "description": "技能退役和清理", "skill": "skill-factory-destroyer", "steps": ["判定退役原因", "标记 deprecated", "编写迁移指引", "设置迁移期", "执行归档或删除"]}}, "classification_system": {"dimensions": ["light_heavy (功能维度)", "thin_thick (内容维度)"], "types": {"light_thin": {"name": "简单技能", "structure": "{name}/SKILL.md", "criteria": "单一功能 + <300行"}, "heavy_thin": {"name": "技能族(薄)", "structure": "{name}-family/SKILL.md + skills/{子}/SKILL.md", "criteria": "多模块 + 每个都精简"}, "light_thick": {"name": "复杂单技能", "structure": "{name}/SKILL.md + references/", "criteria": "单一功能 + 需要详细说明"}, "heavy_thick": {"name": "技能族(厚)", "structure": "{name}-family/SKILL.md + skills/(部分有references/)", "criteria": "多模块 + 部分内容丰富"}}, "callback_mechanism": {"enabled": true, "description": "后续阶段发现信息不足时可回调 researcher 补充"}}, "lifecycle_integration": {"integrated_from": "skill-lifecycle", "mapping": {"scenario-create": "phase_1_production (全流程)", "scenario-modify": "phase_2_processing + phase_3_publishing", "scenario-optimize": "phase_2_processing (四种加工器)", "scenario-integrate": "phase_2_processing (整合模式)", "scenario-decompose": "phase_2_processing (拆分模式)", "workflow-generation": "phase_1_production (generator 输出类型)", "skill-standards": "phase_2_processing (standardizer)"}}, "structure_version": "v0.1.0", "total_sub_skills": 13, "last_updated": "2026-05-01"}"name": "skill-factory", "version": "v10.0.0", "description": "技能工厂 v2 - 全生命周期管理系统，覆盖生产、加工、发布、销毁四阶段，基于轻/重/薄/厚四维分类，共 13 个子技能", "author": "skill-factory", "tags": ["skill-factory", "lifecycle", "production", "processing", "publishing", "destruction", "four-dimensions"], "parent": null, "phases": ["production", "processing", "publishing", "destruction"], "children": [{"name": "skill-factory-researcher", "version": "v1.2.0", "phase": "production", "description": "信息研究员，负责接收输入、交互确认、补充缺失信息"}, {"name": "skill-factory-analyzer", "version": "v2.0.0", "phase": "production", "description": "技术内容分析器"}, {"name": "skill-factory-planner", "version": "v5.0.0", "phase": "production", "description": "技能规划器，基于轻重薄厚四维分类判定类型"}, {"name": "skill-factory-generator", "version": "v5.0.0", "phase": "production", "description": "技能生成器，支持四种输出模式"}, {"name": "skill-factory-packager", "version": "v5.0.0", "phase": "production", "description": "技能打包器，支持四种结构验证"}, {"name": "skill-factory-enricher", "version": "v1.0.0", "phase": "processing", "description": "技能丰富器，补充示例、references、能力、Mermaid 图表"}, {"name": "skill-factory-simplifier", "version": "v1.0.0", "phase": "processing", "description": "技能简化器，合并去重、语言精炼、摘要提取、原子拆分"}, {"name": "skill-factory-beautifier", "version": "v1.0.0", "phase": "processing", "description": "技能美化器，添加 Mermaid 图表、优化排版、配色统一、导航增强"}, {"name": "skill-factory-standardizer", "version": "v1.0.0", "phase": "processing", "description": "技能规范化器，前言区校准、命名规范、必备章节、链接检查"}, {"name": "skill-factory-publisher-version", "version": "v1.0.0", "phase": "publishing", "description": "版本管理器，语义化版本和类型变更判定"}, {"name": "skill-factory-publisher-metadata", "version": "v1.0.0", "phase": "publishing", "description": "元数据管理器，维护 description/tags/dependency 一致性"}, {"name": "skill-factory-publisher-release", "version": "v1.0.0", "phase": "publishing", "description": "发布执行器，git commit 和 tag 操作"}, {"name": "skill-factory-destroyer", "version": "v1.0.0", "phase": "destruction", "description": "技能销毁器，退役标记、迁移指引编写、归档清理"}], "pipeline": {"phase_1_production": {"name": "生产 Production", "description": "从零创建新技能的完整流水线", "steps": [{"step": 1, "skill": "skill-factory-researcher", "capabilities": ["接收输入(URL/文件夹)", "初步浏览内容", "用户交互确认需求", "网络搜索补充资源", "输出完整需求文档"]}, {"step": 2, "skill": "skill-factory-analyzer", "capabilities": ["提取技术信息", "评估功能数量和内容体量"]}, {"step": 3, "skill": "skill-factory-planner", "capabilities": ["判定轻重薄厚四维分类", "选择输出结构"]}, {"step": 4, "skill": "skill-factory-generator", "capabilities": ["按四种类型生成文件"]}, {"step": 5, "skill": "skill-factory-packager", "capabilities": ["验证结构完整性"]}]}, "phase_2_processing": {"name": "加工 Processing", "description": "对已有技能进行加工处理", "skills": {"enricher": {"operations": ["补充示例", "添加 references", "扩展能力", "添加 Mermaid 图表"], "effect": ["可能 薄→厚", "可能 轻→重"]}, "simplifier": {"operations": ["合并去重", "语言精炼", "摘要提取(薄化)", "原子拆分(轻量化)"], "effect": ["可能 厚→薄", "可能 重→多轻"]}, "beautifier": {"operations": ["Mermaid 图表增强", "排版优化", "配色统一", "导航增强"], "effect": ["可读性提升"]}, "standardizer": {"operations": ["前言区校准", "命名规范检查", "必备章节验证", "链接有效性检查"], "effect": ["质量达标"]}, "special_modes": {"assembly": "整合模式 - 多技能合并为技能族", "disassembly": "拆分模式 - 复杂技能拆分为多个简单技能"}}}, "phase_3_publishing": {"name": "发布 Publishing", "description": "版本管理和正式发布", "steps": [{"step": 1, "skill": "skill-factory-publisher-version", "capabilities": ["判定变更类型(breaking/type-upgrade/feature/fix)", "决定版本号递增策略"]}, {"step": 2, "skill": "skill-factory-publisher-metadata", "capabilities": ["更新 description (100-150字符)", "更新 tags (>=3个)", "更新 dependency (parent/children/requires)"]}, {"step": 3, "skill": "skill-factory-publisher-release", "capabilities": ["git add 暂存", "git commit 提交", "git tag 打标签", "推送代码和标签"]}]}, "phase_4_destruction": {"name": "销毁 Destruction", "description": "技能退役和清理", "skill": "skill-factory-destroyer", "steps": ["判定退役原因", "标记 deprecated", "编写迁移指引", "设置迁移期", "执行归档或删除"]}}, "classification_system": {"dimensions": ["light_heavy (功能维度)", "thin_thick (内容维度)"], "types": {"light_thin": {"name": "简单技能", "structure": "{name}/SKILL.md", "criteria": "单一功能 + <300行"}, "heavy_thin": {"name": "技能族(薄)", "structure": "{name}-family/SKILL.md + skills/{子}/SKILL.md", "criteria": "多模块 + 每个都精简"}, "light_thick": {"name": "复杂单技能", "structure": "{name}/SKILL.md + references/", "criteria": "单一功能 + 需要详细说明"}, "heavy_thick": {"name": "技能族(厚)", "structure": "{name}-family/SKILL.md + skills/(部分有references/)", "criteria": "多模块 + 部分内容丰富"}}, "callback_mechanism": {"enabled": true, "description": "后续阶段发现信息不足时可回调 researcher 补充"}}, "lifecycle_integration": {"integrated_from": "skill-lifecycle", "mapping": {"scenario-create": "phase_1_production (全流程)", "scenario-modify": "phase_2_processing + phase_3_publishing", "scenario-optimize": "phase_2_processing (四种加工器)", "scenario-integrate": "phase_2_processing (整合模式)", "scenario-decompose": "phase_2_processing (拆分模式)", "workflow-generation": "phase_1_production (generator 输出类型)", "skill-standards": "phase_2_processing (standardizer)"}}, "structure_version": "v10.0", "total_sub_skills": 13, "last_updated": "2026-05-01"}
+{
+  "name": "skill-factory",
+  "version": "v0.1.0",
+  "description": "技能工厂 - 全生命周期管理系统，覆盖生产、加工、发布、销毁四阶段，基于轻/重/薄/厚四维分类，共 13 个子技能",
+  "author": "skill-factory",
+  "tags": [
+    "skill-factory",
+    "lifecycle",
+    "production",
+    "processing",
+    "publishing",
+    "destruction",
+    "four-dimensions"
+  ],
+  "parent": null,
+  "phases": ["production", "processing", "publishing", "destruction"],
+  "children": [
+    {
+      "name": "skill-factory-researcher",
+      "version": "v0.1.0",
+      "phase": "production",
+      "description": "信息研究员，负责接收输入、交互确认、补充缺失信息"
+    },
+    {
+      "name": "skill-factory-analyzer",
+      "version": "v0.1.0",
+      "phase": "production",
+      "description": "技术内容分析器"
+    },
+    {
+      "name": "skill-factory-planner",
+      "version": "v0.1.0",
+      "phase": "production",
+      "description": "技能规划器，基于轻重薄厚四维分类判定类型"
+    },
+    {
+      "name": "skill-factory-generator",
+      "version": "v0.1.0",
+      "phase": "production",
+      "description": "技能生成器，支持四种输出模式"
+    },
+    {
+      "name": "skill-factory-packager",
+      "version": "v0.1.0",
+      "phase": "production",
+      "description": "技能打包器，支持四种结构验证"
+    },
+    {
+      "name": "skill-factory-enricher",
+      "version": "v0.1.0",
+      "phase": "processing",
+      "description": "技能丰富器，补充示例、references、能力、Mermaid 图表"
+    },
+    {
+      "name": "skill-factory-simplifier",
+      "version": "v0.1.0",
+      "phase": "processing",
+      "description": "技能简化器，合并去重、语言精炼、摘要提取、原子拆分"
+    },
+    {
+      "name": "skill-factory-beautifier",
+      "version": "v0.1.0",
+      "phase": "processing",
+      "description": "技能美化器，添加 Mermaid 图表、优化排版、配色统一、导航增强"
+    },
+    {
+      "name": "skill-factory-standardizer",
+      "version": "v0.1.0",
+      "phase": "processing",
+      "description": "技能规范化器，前言区校准、命名规范、必备章节、链接检查"
+    },
+    {
+      "name": "skill-factory-publisher-version",
+      "version": "v0.1.0",
+      "phase": "publishing",
+      "description": "版本管理器，语义化版本和类型变更判定"
+    },
+    {
+      "name": "skill-factory-publisher-metadata",
+      "version": "v0.1.0",
+      "phase": "publishing",
+      "description": "元数据管理器，维护 description/tags/dependency 一致性"
+    },
+    {
+      "name": "skill-factory-publisher-release",
+      "version": "v0.1.0",
+      "phase": "publishing",
+      "description": "发布执行器，git commit 和 tag 操作"
+    },
+    {
+      "name": "skill-factory-destroyer",
+      "version": "v0.1.0",
+      "phase": "destruction",
+      "description": "技能销毁器，退役标记、迁移指引编写、归档清理"
+    }
+  ],
+  "pipeline": {
+    "phase_1_production": {
+      "name": "生产 Production",
+      "description": "从零创建新技能的完整流水线",
+      "steps": [
+        {
+          "step": 1,
+          "skill": "skill-factory-researcher",
+          "capabilities": [
+            "接收输入(URL/文件夹)",
+            "初步浏览内容",
+            "用户交互确认需求",
+            "网络搜索补充资源",
+            "输出完整需求文档"
+          ]
+        },
+        {
+          "step": 2,
+          "skill": "skill-factory-analyzer",
+          "capabilities": ["提取技术信息", "评估功能数量和内容体量"]
+        },
+        {
+          "step": 3,
+          "skill": "skill-factory-planner",
+          "capabilities": ["判定轻重薄厚四维分类", "选择输出结构"]
+        },
+        {
+          "step": 4,
+          "skill": "skill-factory-generator",
+          "capabilities": ["按四种类型生成文件"]
+        },
+        {
+          "step": 5,
+          "skill": "skill-factory-packager",
+          "capabilities": ["验证结构完整性"]
+        }
+      ]
+    },
+    "phase_2_processing": {
+      "name": "加工 Processing",
+      "description": "对已有技能进行加工处理",
+      "skills": {
+        "enricher": {
+          "operations": [
+            "补充示例",
+            "添加 references",
+            "扩展能力",
+            "添加 Mermaid 图表"
+          ],
+          "effect": ["可能 薄→厚", "可能 轻→重"]
+        },
+        "simplifier": {
+          "operations": [
+            "合并去重",
+            "语言精炼",
+            "摘要提取(薄化)",
+            "原子拆分(轻量化)"
+          ],
+          "effect": ["可能 厚→薄", "可能 重→多轻"]
+        },
+        "beautifier": {
+          "operations": [
+            "Mermaid 图表增强",
+            "排版优化",
+            "配色统一",
+            "导航增强"
+          ],
+          "effect": ["可读性提升"]
+        },
+        "standardizer": {
+          "operations": [
+            "前言区校准",
+            "命名规范检查",
+            "必备章节验证",
+            "链接有效性检查"
+          ],
+          "effect": ["质量达标"]
+        },
+        "special_modes": {
+          "assembly": "整合模式 - 多技能合并为技能族",
+          "disassembly": "拆分模式 - 复杂技能拆分为多个简单技能"
+        }
+      }
+    },
+    "phase_3_publishing": {
+      "name": "发布 Publishing",
+      "description": "版本管理和正式发布",
+      "steps": [
+        {
+          "step": 1,
+          "skill": "skill-factory-publisher-version",
+          "capabilities": [
+            "判定变更类型(breaking/type-upgrade/feature/fix)",
+            "决定版本号递增策略"
+          ]
+        },
+        {
+          "step": 2,
+          "skill": "skill-factory-publisher-metadata",
+          "capabilities": [
+            "更新 description (100-150字符)",
+            "更新 tags (>=3个)",
+            "更新 dependency (parent/children/requires)"
+          ]
+        },
+        {
+          "step": 3,
+          "skill": "skill-factory-publisher-release",
+          "capabilities": [
+            "git add 暂存",
+            "git commit 提交",
+            "git tag 打标签",
+            "推送代码和标签"
+          ]
+        }
+      ]
+    },
+    "phase_4_destruction": {
+      "name": "销毁 Destruction",
+      "description": "技能退役和清理",
+      "skill": "skill-factory-destroyer",
+      "steps": [
+        "判定退役原因",
+        "标记 deprecated",
+        "编写迁移指引",
+        "设置迁移期",
+        "执行归档或删除"
+      ]
+    }
+  },
+  "classification_system": {
+    "dimensions": ["light_heavy (功能维度)", "thin_thick (内容维度)"],
+    "types": {
+      "light_thin": {
+        "name": "简单技能",
+        "structure": "{name}/SKILL.md",
+        "criteria": "单一功能 + <300行"
+      },
+      "heavy_thin": {
+        "name": "技能族(薄)",
+        "structure": "{name}-family/SKILL.md + skills/{子}/SKILL.md",
+        "criteria": "多模块 + 每个都精简"
+      },
+      "light_thick": {
+        "name": "复杂单技能",
+        "structure": "{name}/SKILL.md + references/",
+        "criteria": "单一功能 + 需要详细说明"
+      },
+      "heavy_thick": {
+        "name": "技能族(厚)",
+        "structure": "{name}-family/SKILL.md + skills/(部分有references/)",
+        "criteria": "多模块 + 部分内容丰富"
+      }
+    },
+    "callback_mechanism": {
+      "enabled": true,
+      "description": "后续阶段发现信息不足时可回调 researcher 补充"
+    }
+  },
+  "lifecycle_integration": {
+    "integrated_from": "skill-lifecycle",
+    "mapping": {
+      "scenario-create": "phase_1_production (全流程)",
+      "scenario-modify": "phase_2_processing + phase_3_publishing",
+      "scenario-optimize": "phase_2_processing (四种加工器)",
+      "scenario-integrate": "phase_2_processing (整合模式)",
+      "scenario-decompose": "phase_2_processing (拆分模式)",
+      "workflow-generation": "phase_1_production (generator 输出类型)",
+      "skill-standards": "phase_2_processing (standardizer)"
+    }
+  },
+  "structure_version": "v0.1.0",
+  "total_sub_skills": 13,
+  "last_updated": "2026-05-01"
+}
