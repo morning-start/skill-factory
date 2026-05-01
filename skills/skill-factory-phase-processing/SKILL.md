@@ -246,13 +246,80 @@ phase_config:
 
 ---
 
+## 加工策略详细定义 (v0.2.0 内嵌)
+
+> ⚠️ 原独立文档 `docs/processing-strategies.md` 已合并至此
+
+### 策略一：精简优先模式 (Simplify-First)
+
+**触发条件**: 初稿 >500 行
+
+```
+Simplifier(轻量去重) → Enricher(选择性补充) → Standardizer(最终校验)
+```
+
+| 指标 | 变化 |
+|------|------|
+| 行数 | 减少 20-40% |
+| 适用场景 | >500行冗长稿 |
+
+### 策略二：丰富优先模式 (Enrich-First)
+
+**触发条件**: 初稿 <200 行
+
+```
+Enricher(完整丰富) → Beautifier(可视化增强) → Standardizer(规范化)
+```
+
+| 指标 | 变化 |
+|------|------|
+| 行数 | 增加 100-150% |
+| 适用场景 | <200行简陋稿 |
+
+### 策略三：均衡模式 (Balanced) ⭐ 推荐
+
+**触发条件**: 200-500 行（默认）
+
+```
+Simplifier(0.5h) → Enricher(1-2h) → Beautifier(0.5h) → Standardizer(0.5h)
+```
+
+| 步骤 | 加工器 | 时间 | 重点 |
+|------|--------|------|------|
+| Step 1 | Simplifier | 0.5h | 去重、精炼 |
+| Step 2 | Enricher | 1-2h | 补充核心内容 |
+| Step 3 | Beautifier | 0.5h | 关键流程图 |
+| Step 4 | Standardizer | 0.5h | 格式规范检查 |
+| **总计** | | **2.5-3.5h** | |
+
+### 策略选择快速规则
+
+```yaml
+if 行数 > 500: 使用 "精简优先"
+elif 行数 < 200: 使用 "丰富优先"
+else: 使用 "均衡模式" (默认推荐)
+```
+
+### 循环保护机制
+
+```yaml
+processing_protection:
+  max_processing_rounds: 3        # 同一技能最多加工3轮
+  circular_pattern_detection: true # 检测循环模式
+```
+
+**检测条件**:
+- 连续 2 轮出现 enrich→simplify 操作对 → 终止并警告
+- 总行数变化 < 5% → 认为无实质改进，建议发布
+
+---
+
 ## 参考
 
 - [skill-factory](../SKILL.md) - 工厂根 (Layer 0)
 - [skill-factory-phase-production](../skill-factory-phase-production/SKILL.md) - 上游阶段 (Layer 1)
 - [skill-factory-phase-publishing](../skill-factory-phase-publishing/SKILL.md) - 下游阶段 (Layer 1)
-- [docs/processing-strategies.md](../../docs/processing-strategies.md) - 详细策略定义
-- [enricher](../skill-factory-enricher/SKILL.md) - 子技能 (Layer 2)
-- [simplifier](../skill-factory-simplifier/SKILL.md) - 子技能 (Layer 2)
-- [beautifier](../skill-factory-beautifier/SKILL.md) - 子技能 (Layer 2)
-- [standardizer](../skill-factory-standardizer/SKILL.md) - 子技能 (Layer 2)
+- [enricher](skill-factory-enricher/SKILL.md) - 子技能 (Layer 2)
+- [simplifier](skill-factory-simplifier/SKILL.md) - 子技能 (Layer 2)
+- [beautifier](skill-factory-beautifier/SKILL.md) - 子技能 (Layer 2)
+- [standardizer](skill-factory-standardizer/SKILL.md) - 子技能 (Layer 2)

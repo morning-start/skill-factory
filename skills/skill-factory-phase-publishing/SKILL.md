@@ -258,11 +258,63 @@ phase_config:
 
 ---
 
+## 版本判定规则 (v0.2.0 内嵌)
+
+> ⚠️ 原独立文档 `docs/versioning-rules.md` 已合并至此
+
+### 快速判断 5 步法
+
+```yaml
+Step_1: "是否删除了能力或文件？"
+  → 是: Breaking (major +1)
+  → 否: 继续
+
+Step_2: "是否修改了接口（trigger/input/output）？"
+  → 是: Breaking (major +1)
+  → 否: 继续
+
+Step_3: "是否改变了类型（轻↔重 or 薄↔厚）？"
+  → 是: Type Upgrade (minor +1)
+  → 否: 继续
+
+Step_4: "是否新增了内容（能力/示例/文档）？"
+  → 是: Feature (minor +1)
+  → 否: 继续
+
+Step_5: "其他情况"
+  → Fix (patch +1)
+```
+
+### 四种变更类型速查
+
+| 类型 | 触发条件 | 版本递增 | 示例 |
+|------|---------|---------|------|
+| **Breaking** 🔴 | 删除能力/修改接口/破坏契约 | major+1 | 删除某能力 |
+| **Type Upgrade** 🟠 | 轻↔重 或 薄↔厚 变化 | minor+1 | T1→T2 拆分 |
+| **Feature** 🟢 | 新增能力/示例/文档 | minor+1 | 补充新示例 |
+| **Fix** 🟢 | 文字/格式/链接修正 | patch+1 | 错别字修复 |
+
+### 边缘场景决策
+
+| 场景 | Breaking? | 版本递增 |
+|------|-----------|---------|
+| T1→T2（拆分子技能） | ❌ 否 | minor+1 |
+| T1→T3（加references/） | ❌ 否 | minor+1 |
+| 删除某能力 | ✅ 是 | major+1 |
+| 修改trigger | ✅ 是 | major+1 |
+| 纯内容优化 | ❌ 否 | patch+1 |
+
+### 版本号格式规范
+
+- ✅ 有效: `v0.1.0`, `v0.2.0`, `v1.0.0`, `v10.0.0`
+- ❌ 无效: `v1.0`, `1.0.0`, `V1.0.0`, `v01.1.0`
+
+---
+
 ## 参考
 
 - [skill-factory](../SKILL.md) - 工厂根 (Layer 0)
 - [skill-factory-phase-processing](../skill-factory-phase-processing/SKILL.md) - 上游阶段 (Layer 1)
-- [docs/versioning-rules.md](../../docs/versioning-rules.md) - 版本判定完整规则
-- [publisher-version](../skill-factory-publisher-version/SKILL.md) - 子技能 (Layer 2)
-- [publisher-metadata](../skill-factory-publisher-metadata/SKILL.md) - 子技能 (Layer 2)
-- [publisher-release](../skill-factory-publisher-release/SKILL.md) - 子技能 (Layer 2)
+- [publisher-version](skill-factory-publisher-version/SKILL.md) - 子技能 (Layer 2)
+- [publisher-metadata](skill-factory-publisher-metadata/SKILL.md) - 子技能 (Layer 2)
+- [publisher-release](skill-factory-publisher-release/SKILL.md) - 子技能 (Layer 2)
