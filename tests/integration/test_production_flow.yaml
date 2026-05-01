@@ -1,0 +1,150 @@
+name: Production Flow Integration Tests
+version: v0.2.0
+description: 生产阶段端到端流程集成测试
+
+scenarios:
+  # ========== 完整 Type 1 流程 ==========
+  - name: 完整Type1技能创建-快速路径
+    description: "创建一个简单的 git-commit 技能，验证快速路径"
+    input:
+      user_request: "帮我根据 git commit 文档创建一个技能"
+      source_url: "https://git-scm.com/doc/git-commit"
+      expected_type: "light-thin"
+    steps:
+      - step: 1
+        name: "Researcher (快速模式)"
+        mode: "fast_research"
+        expected_time: "<=10min"
+        output: "简化需求文档"
+
+      - step: 2
+        name: "Analyzer"
+        expected_time: "~5min"
+        output:
+          complexity: "simple"
+          estimated_lines: "<300"
+
+      - step: 3
+        name: "Planner"
+        expected_time: "~5min"
+        output:
+          type_decision: "Type 1 (light-thin)"
+          path: "fast_path"
+
+      - step: 4
+        name: "Generator"
+        expected_time: "~5min"
+        output_file: "git-commit/SKILL.md"
+
+      - step: 5
+        name: "Packager (快速验证)"
+        mode: "quick_check"
+        expected_time: "~3min"
+        output:
+          quality_score: ">=80"
+          result: "passed"
+
+      - step: 6
+        name: "⏭️ 跳过加工阶段"
+        action: "确认跳过"
+        skipped: ["enricher", "simplifier", "beautifier", "standardizer"]
+
+      - step: 7-9
+        name: "Publisher (版本+元数据+发布)"
+        mode: "type_1_fast"
+        expected_time: "~7min"
+        output:
+          version: "v0.1.0"
+          release_success: true
+
+    expected_results:
+      total_time: "<40min"
+      output_files: ["git-commit/SKILL.md"]
+      no_processing_stage: true
+      efficiency_gain: ">85%"
+    priority: P0
+    related_task: T2.3
+
+  # ========== 完整 Type 3 流程 ==========
+  - name: 完整Type3技能创建-标准路径
+    description: "创建一个复杂的 vue-component 技能，走标准路径含加工"
+    input:
+      user_request: "帮我创建 Vue 组件开发技能，需要详细文档"
+      source_url: "https://vuejs.org/guide/essentials/component-basics.html"
+      expected_type: "light-thick"
+    steps:
+      - step: 1-5
+        name: "生产阶段 (标准模式)"
+        mode: "standard"
+        expected_time: "~45min"
+
+      - step: 6
+        name: "加工策略选择"
+        input_line_count: 350  # 200-500范围
+        selected_strategy: "balanced"
+
+      - step: 7-10
+        name: "加工执行 (均衡模式)"
+        processors: ["simplifier", "enricher", "beautifier", "standardizer"]
+        expected_time: "2.5-3.5h"
+
+      - step: 11-13
+        name: "发布阶段"
+        expected_time: "~15min"
+
+    expected_results:
+      total_time: "3-4h"
+      output_files:
+        - "vue-component/SKILL.md"
+        - "vue-component/references/api-reference.md"
+        - "vue-component/references/examples.md"
+        - "vue-component/references/best-practices.md"
+      processing_completed: true
+      quality_score: ">=85"
+    priority: P1
+
+  # ========== 回调场景测试 ==========
+  - name: Analyzer回调Researcher场景
+    description: "验证分析阶段发现信息不足时触发回调机制"
+    input:
+      initial_research_completeness: 70  # <80%
+      missing_info: ["API签名", "参数类型"]
+    steps:
+      - step: 1
+        name: "Researcher 初次输出"
+        output_completeness: 70
+
+      - step: 2
+        name: "Analyzer 分析中..."
+        finding: "缺少 API 签名信息"
+        action: "callback to researcher (#1)"
+
+      - step: 3
+        name: "Researcher 处理回调"
+        callback_count: 1
+        action: "搜索补充 API 文档"
+        output: "补充 REST API 签名"
+
+      - step: 4
+        name: "Analyzer 继续分析"
+        new_finding: "缺少边界条件"
+        action: "callback to researcher (#2)"
+
+      - step: 5
+        name: "Researcher 第2次回调"
+        callback_count: 2
+        auto_escalate_triggered: true  # >= threshold(2)
+        warning: "⚠️ 已触发自动升级建议"
+
+    expected_results:
+      callback_count: 2
+      within_limit: true  # < max(3)
+      escalation_warning_shown: true
+      final_completeness: 90
+    priority: P0
+    related_task: T2.1
+
+test_metadata:
+  total_scenarios: 3
+  coverage_target: "production_flow_e2e"
+  created_at: 2026-05-01

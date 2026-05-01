@@ -1,0 +1,171 @@
+name: Processing Flow Integration Tests
+version: v0.2.0
+description: 加工阶段端到端流程集成测试 (T2.2)
+
+scenarios:
+  # ========== 均衡策略完整流程 ==========
+  - name: 均衡模式加工完整流程
+    description: "对中等质量初稿执行均衡加工策略"
+    input:
+      skill_name: "data-processor"
+      initial_lines: 380  # 200-500范围
+      initial_quality_score: 65
+      selected_strategy: "balanced"
+    steps:
+      - step: 1
+        name: "Simplifier 轻量去重"
+        duration: "0.5h"
+        operations:
+          - "合并重复描述"
+          - "精炼冗余语言"
+        output:
+          line_change: "-40"  # ~10%减少
+          new_lines: 340
+
+      - step: 2
+        name: "Enricher 按需补充"
+        duration: "1.5h"
+        operations:
+          - "补充2个关键示例"
+          - "添加错误处理说明"
+        output:
+          line_change: "+60"
+          new_lines: 400
+
+      - step: 3
+        name: "Beautifier 关键图表"
+        duration: "0.5h"
+        operations:
+          - "添加处理流程图 (flowchart)"
+          - "添加架构图"
+        output:
+          diagrams_added: 2
+          readability_improved: true
+
+      - step: 4
+        name: "Standardizer 最终校验"
+        duration: "0.5h"
+        checks:
+          - "前言区格式"
+          - "必备章节"
+          - "命名规范"
+          - "链接有效性"
+        output:
+          quality_score: 88  # >80 通过
+          issues_found: 2
+          issues_fixed: 2
+
+    expected_results:
+      total_duration: "3h"
+      final_quality_score: 88
+      final_lines: 400
+      grade: "良好"
+      can_publish: true
+    priority: P0
+    related_task: T2.2
+
+  # ========== 循环检测中断场景 ==========
+  - name: 加工循环检测与中断
+    description: "验证循环保护机制能正确检测并警告"
+    input:
+      skill_name: "text-formatter"
+      max_rounds: 3
+      circular_detection: true
+    processing_history:
+      - round: 1
+        operations: ["enrich(+50行)", "simplify(-30行)"]
+        net: "+20行"
+        quality_delta: "+5分"
+
+      - round: 2
+        operations: ["enrich(+45行)", "simplify(-28行)"]
+        net: "+17行"
+        quality_delta: "+3分"
+
+    current_round: 3
+    proposed_operations: ["enrich(+48行)", "simplify(-29行)"]
+
+    steps:
+      - step: 1
+        name: "开始第3轮加工"
+        check: "round <= max_rounds (3<=3)"
+
+      - step: 2
+        name: "循环模式检测"
+        detection:
+          pattern: "enrich→simplify"
+          consecutive_occurrences: 3
+          detected: true
+
+      - step: 3
+        name: "效率评估"
+        analysis:
+          avg_net_change_per_round: "+18.7行"
+          avg_quality_delta: "+4分/轮"
+          diminishing_returns: true
+
+      - step: 4
+        name: "发出警告"
+        warning:
+          level: "warning"
+          message: "⚠️ 检测到可能的加工循环（第3轮）"
+          recommendation: "当前质量已足够，考虑直接进入发布阶段"
+
+      - step: 5
+        name: "用户决策"
+        options:
+          - "终止加工，进入发布"
+          - "继续最后一轮"
+        expected_choice: "终止加工"
+
+    expected_results:
+      circular_detected: true
+      warning_shown: true
+      processing_stopped: true
+      total_rounds: 3
+      within_limit: true
+    priority: P0
+    related_task: T2.2
+
+  # ========== 快速路径跳过加工验证 ==========
+  - name: Type1跳过加工阶段验证
+    description: "确保 Type 1 技能正确跳过所有加工步骤"
+    input:
+      skill_name: "url-encoder"
+      type: "light-thin"
+      packager_quick_check_score: 82  # >=80
+    steps:
+      - step: 1-5
+        name: "生产阶段完成"
+        output: "url-encoder/SKILL.md"
+
+      - step: 6
+        name: "Packager 快速验证通过"
+        score: 82
+        decision: "进入发布阶段"
+
+      - step: 7
+        name: "检查加工阶段状态"
+        checks:
+          - enricher_executed: false
+          - simplifier_executed: false
+          - beautifier_executed: false
+          - standardizer_executed: false
+        all_skipped: true
+
+      - step: 8-10
+        name: "直接进入发布"
+        path: "production → publishing (跳过processing)"
+
+    expected_results:
+      processing_skipped: true
+      all_processors_not_executed: true
+      time_saved: "2-3.5h"  # vs 标准路径
+      direct_to_publish: true
+    priority: P0
+    related_task: T2.3
+
+test_metadata:
+  total_scenarios: 3
+  coverage_target: "processing_flow_e2e"
+  created_at: 2026-05-01
