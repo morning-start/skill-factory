@@ -7,13 +7,159 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ---
 
-## [Unreleased]
+## [v0.5.1] - 2026-05-16
 
-### 计划中
-- v0.4.0: 工程化基础（自动化测试、数据流验证）
-- v0.5.0: 功能增强（CLI 工具、diff 预览）
-- v0.7.0: 高级特性（本地技能注册中心）
-- v1.0.0: GA 里程碑（生产就绪）
+### 🔧 回溯审计全面修复
+
+基于 v0.3.1→v0.5.0 变更链的回溯审计，修复过度删除、价值流失、跨文件不一致等 16 项问题。
+
+#### 高优先级修复
+- ✨ **D1**: creator 加工操作表从名称列表升级为含技巧要点的操作指南（4 列：操作/用途/何时用/关键技巧）
+- ✨ **D3**: design-principles 新增"超三层处理 SOP"章节（检测→分析→方案→确认→标记 5 阶段 + 用户确认话术模板）
+- ✨ **U1**: 根 SKILL.md "这是什么？"升级为完整定位页（痛点表格 + 适用场景 + 不适用场景）
+- ✨ **I2**: publisher/assembler 补充 writing-rules 引用（跨文件引用对称完成）
+
+#### 中优先级修复
+- ✨ **U2**: 快速开始表 creator/assembler 行增加描述（结构对称）
+- ✨ **U3/U4**: creator 生产流水线新增入口分流（新建/优化/检查规范 三路分流）
+- ✨ **I3**: design-principles 版本判定表补充 refactor + 类型升级行（与 publisher 对齐）
+- ✨ **I1**: assembler 合并后生成内容可回引 creator
+- ✨ **U5**: publisher 注意事项版本号例子更新为 v0.5.x 系列
+- ✨ **U6**: assembler 拆分维度扩展（新增 design-system/api-docs 非编程领域示例）
+
+### 📊 版本统计
+
+| 维度 | v0.5.0 | v0.5.1 | 变化 |
+|------|--------|--------|------|
+| 文件数 | 7 | 7 | 不变 |
+| 总行数 | ~1050 | **~1400** | +33% |
+| 设计模式 | 11 | 11 | 不变 |
+| 跨文件引用 | 不对称 | **全对称** | publisher/assembler 各 3 引用 |
+
+---
+
+## [v0.5.0] - 2026-05-16
+
+### ✍️ 写作高级规则模块（执行层补充）
+
+基于第二轮外部搜索（agentskills.io / hiddentao.com 28 条规则 / agent-almanac / CSDN 技能教程）发现的 7 项高价值缺失内容。
+
+#### 🆕 新增核心文件
+- **`references/writing-rules.md`** (~173 行)：技能写作高级规则，7 个章节：
+  - R1: **Gotchas 坑点清单** — 6 个环境级陷阱（查询条件遗漏/API 版本不匹配/字段歧义/时区陷阱/编码问题/权限默认值）
+  - R2: **反模式命名 + 失败模式** — 4 个反模式（泛泛指令/选项菜单/隐含假设/禁令无替代方案），每个配失败原因和正确做法
+  - R3: **Happy Path First** — 排序原则：90% 场景前置、Quickstart 覆盖端到端、边缘情况后置
+  - R4: **错误处理矩阵** — 5 类异常（输入/工具/数据/权限/超时）各有触发条件→处理方式→反馈信息→是否重试
+  - R5: **Plan→Validate→Execute 验证循环** — 二进制验证标准（拒绝"代码整洁"，要求"`eslint` exit code = 0"）
+  - R6: **复杂度分级** — basic(<5步)/intermediate(5-10步)/advanced(>10步) 三级定义
+  - R7: **默认值优于选项菜单** — Agent 选择弱点分析 + 3 组对比示例
+
+#### 升级现有文件
+- ✨ `skill-standards.md`: 新增"写作质量检查"章节（注意事项升级要求表 + 反模式速查表），常见问题 9→13 条
+- ✨ `skill-factory-creator/SKILL.md`: 新增"写作规则速查"章节（排序原则/规则配对公式/反模式三段式/验证清单规范/复杂度自检）
+- ✨ 根 SKILL.md: 设计模式表 7→11 个（新增 Happy Path First / 反模式命名 / 验证循环 / 错误处理矩阵）
+
+#### 来源引用
+| 来源 | 贡献内容 |
+|------|---------|
+| [agentskills.io](https://agentskills.io/skill-creation/best-practices) | Gotchas 概念、默认值原则 |
+| [hiddentao.com](https://hiddentao.com/archives/2026/04/26/the-definitive-guide-to-writing-great-skill-files-for-ai-agents/) | 28 条写作规则、反模式命名、Happy Path First |
+| [agent-almanac](https://github.com/pjt222/agent-almanac/blob/main/guides/creating-skills.md) | Plan→Validate→Execute、复杂度分级 |
+| [CSDN 技能教程](https://blog.csdn.net/weixin_44673517/article/details/158839657) | 错误处理矩阵 |
+
+### 📊 版本统计
+
+| 维度 | v0.4.1 | v0.5.0 | 变化 |
+|------|--------|--------|------|
+| 文件数 | 6 | **7** | +1 (writing-rules.md) |
+| 总行数 | ~888 | **~1050** | +18% |
+| 设计模式 | 7 | **11** | +4 |
+| references | 2 | **3** | +1 |
+
+---
+
+## [v0.4.1] - 2026-05-16
+
+### 📚 质量审计与外部最佳实践补充
+
+基于 repo-analyzer 审计报告（13 个问题）+ 外部搜索（agentskills.io / Anthropic 官方）的优化。
+
+#### P0 修复（影响正确性）
+- ✅ 层级模板与实际结构矛盾 → 统一为"轻量工坊 + 完整工厂"双模式
+- ✅ 旧版命名残留（researcher/standardizer/coordinator/worker）→ 全部替换为中文描述
+- ✅ design-principles 嵌套模式描述错误（B→C 应为 B 嵌入 A）
+
+#### P1 修复（影响用户体验）
+- ✅ 版本历史行数 1,500→800 修正
+- ✅ publisher "四级" vs "五项"矛盾修复
+- ✅ "协调器" vs "阶段指南"术语统一
+- ✅ 三个子技能补全"任务目标"+"注意事项"必备章节
+- ✅ 根 SKILL.md 补充示例章节 + 注意事项
+
+#### P2 优化（提升规范合规性）
+- ✅ creator/assembler 拆分内容去重（creator 引用 assembler）
+- ✅ skill-standards 补充轻量工坊 + 完整工厂双套命名规范
+
+#### 🆕 新增内容（来自外部最佳实践）
+- ✨ **Progressive Disclosure**：Skills 三阶段加载机制（Discovery→Activation→Execution）
+- ✨ **Token 效率原则**：最小高信号 token 集原则 + 5 条实操建议
+- ✨ **description 编写 4 条规则**：触发信号、关键词、单行、防歧义
+- ✨ **scripts/ + assets/ 目录约定**：完整技能目录结构模板
+- ✨ 设计模式表扩展至 7 个（新增渐进加载、Token 效率）
+- ✨ skill-standards 常见问题表扩展至 9 条
+- ✨ metadata.json 同步更新（行数、新概念、加工策略术语）
+
+---
+
+## [v0.4.0] - 2026-05-16
+
+### 🔧 工坊模式重构（重大变更）
+
+基于 [ANALYSIS_REPORT.md](ANALYSIS_REPORT.md) 的架构分析结果，将工厂模式重构为工坊模式。
+
+#### 精简结构：18 文件 → 6 文件
+- 📦 从 6,000 行精简至 ~1,000 行（减少 83%）
+- 🗂️ 从 18 个 SKILL.md 文件精简为 4 个
+- 📊 从 107 个 Mermaid 图表精简至 ~15 个
+- 🏷️ 从 Type 4（重+厚）降至 Type 2（重+薄）
+
+#### 核心变更
+- ✨ 重写根 **SKILL.md** 为工坊模式入口 (~216 行)
+- ✨ 新建 **references/design-principles.md**：合并旧的三层铁律 + SOP + 工厂架构 + 发布路径等 4 个参考文档 (~138 行)
+- ✨ 新建 **references/skill-standards.md**：合并旧的 packager + standardizer + beautifier 规范职责 (~110 行)
+- ✨ 新建 **skills/skill-factory-creator/SKILL.md**：合并生产 5 步流水线 + 加工 4 种策略 (~177 行)
+- ✨ 新建 **skills/skill-factory-publisher/SKILL.md**：合并发布 3 步 + 销毁流程 (~168 行)
+- ✨ 新建 **skills/skill-factory-assembler/SKILL.md**：从 Enricher 独立出的整合器 (~184 行)
+
+#### P0 修复
+- ✅ 统一版本号：所有文件统一为 v0.4.0
+- ✅ 职责分离：Standardizer 与 Packager 合并为统一的 skill-standards.md 评分体系
+- ✅ 层级修正：layers 从 3 修正为 2（旧版协调器→执行者的两层已合并）
+
+#### P1 修复
+- ✅ 合并 Phase-destruction 协调器至 destroyer（发布器统一处理）
+- ✅ Assembly 从 Enricher 独立为 skill-factory-assembler
+
+#### P2 修复
+- ✅ 13 执行者 → 3 个阶段指南（creator/publisher/assembler）
+- ✅ SOP 182 行 → design-principles.md 中的超三层处理章节（~20 行）
+- ✅ 废弃旧文件：4 个协调器 + 13 个执行者 SKILL.md
+- ✅ 废弃旧 references：three-layer-iron-rule.md / over-three-layer-sop.md / factory-architecture.md
+
+#### 设计哲学变更
+- 🏭→🔧 从"工厂操作系统"转变为"工坊设计指南"
+- 📖 从"需要学习元系统"转变为"可随时查阅的模式目录"
+- ⚡ 从"每个概念必有独立文件"转变为"内容驱动而非架构驱动"
+
+### 📊 版本统计
+
+| 维度 | 旧版 (v0.3.1) | 新版 (v0.4.0) | 变化 |
+|------|-------------|-------------|------|
+| 文件数 | 18 | 6 | -67% |
+| 总行数 | ~6,000 | ~1,000 | -83% |
+| Mermaid 图表 | 107 | ~15 | -86% |
+| 架构层级 | 3 | 2 | 简化 |
+| 技能类型 | Type 4 | Type 2 | 降级 |
 
 ---
 
