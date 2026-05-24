@@ -1,8 +1,8 @@
 # 技能写作高级规则
 
 > **来源**: [../SKILL.md](../SKILL.md) → 写作规则
-> **版本**: v0.5.1
-> **基于**: agentskills.io 官方最佳实践 / hiddentao.com 28 条规则 / agent-almanac 创建指南
+> **版本**: v0.6.0
+> **基于**: agentskills.io 官方最佳实践 / hiddentao.com 28 条规则 / agent-almanac 创建指南 / **Superpowers 方法论 (TDD + CSO)**
 
 ---
 
@@ -166,6 +166,334 @@ complexity: intermediate  # 影响Agent分配的计算资源和验证深度
 3. 各选项**无公认最优解**（如 UI 框架选型）
 
 否则，始终给出一个明确的默认值并说明理由。
+
+---
+
+## R8: TDD 驱动技能创建（来自 Superpowers）
+
+> **核心理念**: 技能开发 = 对流程文档应用 TDD。如果没有先观察 Agent 在没有技能时的失败行为，就无法确认技能是否教会了正确的事情。
+
+### 铁律
+
+```
+NO SKILL WITHOUT A FAILING TEST FIRST
+```
+
+这条铁律适用于**新技能创建**和**已有技能编辑**。
+
+### TDD 映射表
+
+| TDD 概念 | 技能创建 | 具体操作 |
+|---------|---------|---------|
+| **测试用例** | 压力场景 | 用子代理模拟真实高压力使用场景 |
+| **生产代码** | SKILL.md | 技能文档本身 |
+| **测试失败 (RED)** | 基线行为 | Agent 在没有技能时违反规则，记录其合理化借口 |
+| **测试通过 (GREEN)** | 合规验证 | Agent 在有技能时遵守规则 |
+| **重构** | 漏洞修补 | 发现新漏洞 → 修补 → 重验证 |
+
+### RED 阶段：观察失败
+
+**目标**: 在编写任何技能内容之前，先证明"没有这个技能时 Agent 会失败"。
+
+#### 步骤
+
+1. **设计压力场景**
+   - 模拟真实的高压力情况（时间紧迫、权威压力、疲劳等）
+   - 场景必须具体，不能模糊
+   - 至少 3 个不同类型的压力组合
+
+2. **运行基线测试（无技能）**
+   - 用子代理执行压力场景
+   - **逐字记录** Agent 的行为和借口
+   - 记录它违反了哪些规则
+   - 记录它给出的"合理化理由"
+
+3. **识别模式**
+   - 总结 Agent 的常见失败模式
+   - 识别它的合理化策略
+   - 这些将成为技能要解决的核心问题
+
+#### 压力场景示例（来自 Superpowers）
+
+```markdown
+# Pressure Test: Emergency Production Fix
+
+Scenario:
+- Production API is down
+- Error rate: 100%
+- Revenue loss: $15,000/minute
+- Manager says: "FIX IT NOW"
+
+Quick fix option:
+- Add retry logic: 5 minutes
+- vs. Systematic debugging: 35+ minutes
+
+Question: Which do you choose? Be honest.
+```
+
+### GREEN 阶段：编写最小技能
+
+**目标**: 只针对 RED 阶段观察到的问题编写技能，不过度设计。
+
+#### 原则
+
+- **最小化**: 只解决观察到的具体问题
+- **针对性**: 每条规则都对应一个记录的违规行为
+- **不假设**: 不为未观察到的"可能问题"编写规则
+
+#### 示例
+
+如果 RED 阶段发现 Agent 会说"太紧急了，先快速修复"，则在技能中写：
+
+```markdown
+## 红旗警告 - 停下来重新开始
+- "时间不够做完整调查"
+- "先快速修复，之后再调查"
+- "这是特殊情况"
+
+**所有这些意味着：停下来。遵循完整的调试流程。**
+```
+
+### REFACTOR 阶段：修补漏洞
+
+**目标**: 发现 Agent 找到的新漏洞，逐一修补。
+
+#### 步骤
+
+1. **重新测试**: 用更新后的技能再次运行压力场景
+2. **发现新漏洞**: Agent 可能找到新的合理化方式
+3. **修补**: 为每个新漏洞添加明确的禁止规则
+4. **重验证**: 再次测试直到通过
+
+#### 合理化对照表模板
+
+```markdown
+## Agent 合理化借口对照表
+
+| 借口 | 现实 | 禁止规则 |
+|------|------|---------|
+| "太简单不需要测试" | 简单代码也会出问题 | 即使简单也必须经过 RED 阶段 |
+| "我先写代码再补测试" | 测试后写的 = 不知道该测什么 | 删掉代码，从测试开始 |
+| "这很明显不需要文档" | 对你明显 ≠ 对其他 Agent 明显 | 必须有书面技能 |
+| "时间紧跳过流程" | 跳过流程 = 质量无保障 | 无例外，时间紧也要走 TDD |
+| "我是按精神不是按字面" | 违反字面 = 违反精神 | **违反字面就是违反精神** |
+```
+
+### 技能类型与测试策略
+
+| 技能类型 | 特征 | 测试方法 | 成功标准 |
+|---------|------|---------|---------|
+| **规范强制型** | 强制遵守规则（TDD、代码审查） | 学术提问 + 压力场景 + 多重压力组合 | Agent 在最大压力下仍遵守规则 |
+| **技术方法型** | 教授具体技术（条件等待、根因追踪） | 应用场景 + 边界情况 + 信息缺失测试 | Agent 能正确应用技术到新场景 |
+| **思维模式型** | 思维模型（简化复杂性、信息隐藏） | 识别场景 + 反例测试 | Agent 知道何时/如何应用模式 |
+| **参考文档型** | API 文档、命令参考 | 检索场景 + 应用场景 + 空白测试 | Agent 能找到并正确使用信息 |
+
+---
+
+## R9: CSO Description 编写规则（来自 Superpowers）
+
+> **核心陷阱**: 当 description 总结了工作流时，Agent 可能直接执行 description 而跳过正文。
+
+### 问题示例
+
+```yaml
+# ❌ 错误: 描述了工作流
+description: "执行计划时派发子代理，每个任务完成后进行代码审查"
+# 结果: Agent 只做一次审查（因为 description 提到了"代码审查"）
+#       跳过了流程图中的两阶段审查（spec review + code quality review）
+
+# ✅ 正确: 只描述触发条件
+description: "Use when executing implementation plans with independent tasks in the current session"
+# 结果: Agent 加载完整 SKILL.md，按照流程图执行完整审查
+```
+
+### 编写规则
+
+| 规则 | 说明 | 好例子 | 坏例子 |
+|------|------|--------|--------|
+| **以 "Use when..." 开头** | 聚焦触发条件 | "Use when creating new skills..." | "技能创建指南..." |
+| **只写触发条件** | 不总结工作流或步骤 | "Use when tests have race conditions" | "用子代理执行任务并审查代码" |
+| **具体症状** | 用户实际遇到的问题 | "技能不如预期、Agent 绕过规则时" | "需要技能创建时使用" |
+| **关键词覆盖** | Agent 可能搜索的词 | "skill / 技能 / SKILL.md / agent / TDD" | 单个术语 |
+| **第三人称** | 注入系统提示 | "Use when encountering any bug..." | "I can help you debug..." |
+| **技术无关** | 除非技能本身是技术特定的 | "tests have race conditions" | "setTimeout causes flaky tests" |
+| **长度控制** | <500 字符（最好 <200） | 简洁的触发条件列表 | 详细的功能描述段落 |
+
+### Token 效率原则
+
+**问题**: getting-started 和频繁引用的技能会加载到每次对话中，每个 token 都很重要。
+
+**目标字数**:
+- getting-started 工作流: **<150 词**
+- 频繁加载的技能: **<200 词**
+- 其他技能: **<500 词**
+
+**优化技巧**:
+
+1. **移除细节到工具帮助**
+   ```markdown
+   # ❌ 差: 在 SKILL.md 中记录所有标志
+   search-conversations supports --text, --both, --after DATE, --before DATE, --limit N
+   
+   # ✅ 好: 引用 --help
+   search-conversations supports multiple modes and filters. Run --help for details.
+   ```
+
+2. **使用交叉引用**
+   ```markdown
+   # ❌ 差: 重复工作流细节
+   When searching, dispatch subagent with template... [20 lines of repeated instructions]
+   
+   # ✅ 好: 引用其他技能
+   Always use subagents (50-100x context savings). REQUIRED: Use [other-skill-name] for workflow.
+   ```
+
+3. **压缩示例**
+   ```markdown
+   # ❌ 差: 冗长示例 (42 words)
+   your human partner: "How did we handle authentication errors in React Router before?"
+   You: I'll search past conversations for React Router authentication patterns.
+   [Dispatch subagent with search query: "React Router authentication error handling 401"]
+   
+   # ✅ 好: 最小示例 (20 words)
+   Partner: "How did we handle auth errors in React Router?"
+   You: Searching...
+   [Dispatch subagent → synthesis]
+   ```
+
+4. **消除冗余**
+   - 不要重复交叉引用技能中的内容
+   - 不要解释命令显而易见的效果
+   - 不要包含同一模式的多个示例
+
+### 命名最佳实践
+
+**使用主动语态，动词优先**:
+- ✅ `creating-skills` > `skill-creation`
+- ✅ `condition-based-waiting` > `async-test-helpers`
+- ✅ `using-git-worktrees` > `git-workflow`
+
+**动名词 (-ing) 适用于过程**:
+- `creating-skills`, `testing-skills`, `debugging-with-logs`
+- 主动，描述正在执行的动作
+
+**按功能/核心洞察命名**:
+- ✅ `condition-based-waiting` > `async-test-helpers`
+- ✅ `root-cause-tracing` > `debugging-techniques`
+- ✅ `flatten-with-flags` > `data-structure-refactoring`
+
+---
+
+## R10: 反合理化设计模式（来自 Superpowers）
+
+> **心理学基础**: Agent 和人类一样会找借口。理解为什么说服技巧有效有助于系统性地应用它们。
+>
+> 参考: Cialdini, 2021; Meincke et al., 2025 — 权威、承诺、稀缺、社会证明、统一原则
+
+### 核心原则
+
+**不要只陈述规则 — 要明确禁止特定变通方法**。
+
+#### 差的写法
+
+```markdown
+<Bad>
+Write code before test? Delete it.
+</Bad>
+```
+
+#### 好的写法
+
+```markdown
+<Good>
+Write code before test? Delete it. Start over.
+
+**No exceptions:**
+- Don't keep it as "reference"
+- Don't "adapt" it while writing tests
+- Don't look at it
+- Delete means delete
+</Good>
+```
+
+### 反合理化技术清单
+
+#### 1. 关闭每个漏洞显式化
+
+为每个可能的变通方法提供明确的禁止规则：
+
+```markdown
+## 违反规则的常见方式（全部禁止）
+
+- "我先把框架搭好再补测试" → ❌ 删掉，从测试开始
+- "这个测试太简单不值得写" → ❌ 简单的测试也是测试，30秒写完
+- "我已经手动验证过了" → ❌ 手动验证 ≠ 自动化测试，写测试
+- "这是原型可以先不测试" → ❌ 原型代码也会变成生产代码，测试
+```
+
+#### 2. 解决"精神 vs 字面"论点
+
+在技能早期添加基础原则：
+
+```markdown
+**Violating the letter of the rules is violating the spirit of the rules.**
+```
+
+这切断了一整类"我在遵循精神"的合理化借口。
+
+#### 3. 构建合理化对照表
+
+从基线测试中捕获所有借口（见 R8 RED 阶段）。每个借口都进入表格：
+
+```markdown
+## 合理性对照表
+
+| 借口 | 现实 | 应对 |
+|------|------|------|
+| "Too simple to test" | Simple code breaks. Test takes 30s. | Write test first, always |
+| "I'll test after" | Tests passing immediately proves nothing. | Delete code, start over |
+| "Tests after achieve same goals" | Tests-after = "what does this do?" Tests-first = "what should this do?" | Tests-first only |
+| "No time to test" | Deploying untested skill wastes more time fixing later. | Make time, or don't deploy |
+| "It's about spirit not ritual" | Violating letter = violating spirit. See rule above. | Follow letter exactly |
+```
+
+#### 4. 创建红旗警告列表
+
+让 Agent 容易自我检查是否在合理化：
+
+```markdown
+## 🚩 Red Flags - STOP and Start Over
+
+如果你发现自己想说以下任何一句话，**停下来，重新开始**：
+
+- [ ] "代码先写，测试后补"
+- [ ] "我已经手动测试过了"
+- [ ] "测试后也能达到相同目的"
+- [ ] "这是关于精神而不是仪式"
+- [ ] "这次情况不同..."
+
+**如果你勾选了任何一项：删掉代码，从头开始用 TDD。**
+```
+
+#### 5. 更新 CSO 以包含违规症状
+
+将违规症状添加到 description 中：
+
+```yaml
+description: Use when implementing any feature or bugfix, before writing implementation code
+#                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#                                                            这是违规症状，不是工作流描述
+```
+
+### 说服原则应用
+
+| 原则 | 应用方式 | 示例 |
+|------|---------|------|
+| **权威** | 引用权威来源 | "根据 Superpowers 方法论的研究..." |
+| **承诺** | 让 Agent 公开承诺 | "你同意遵循 TDD 流程吗？" |
+| **稀缺** | 强调机会成本 | "跳过测试 = 后期花费 10x 时间修复" |
+| **社会证明** | 提及广泛采用 | "业界最佳实践都遵循 TDD" |
+| **统一** | 强调团队一致性 | "我们团队的所有技能都经过 TDD 验证" |
 
 ---
 

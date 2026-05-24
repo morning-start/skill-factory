@@ -1,9 +1,9 @@
 ---
 name: skill-factory-creator
-version: v0.5.1
+version: v0.6.0
 author: skill-factory
-description: 技能创建器 — 覆盖技能从零到一的完整创建流程，包含五步生产流水线（需求研究、类型分析、路径规划、内容生成、规范打包）和四种加工策略（精简冗余、丰富内容、美化格式、标准化检查），基于四维分类自动判定 Type 1-4 的最优加工路径与循环保护机制
-tags: [skill-factory, creator, skill-creation, production, processing, layer-1, type-classification]
+description: Use when creating new skills, editing existing skills, or optimizing skill quality — covers TDD-driven creation workflow (RED-GREEN-REFACTOR), four-dimensional type classification, processing strategies, and standards compliance validation
+tags: [skill-factory, creator, skill-creation, tdd-driven, production, processing, layer-1, type-classification]
 dependency:
   parent: skill-factory
   layer: 1
@@ -28,11 +28,77 @@ dependency:
 
 ---
 
-## 一、生产流水线
+## 一、TDD 驱动创建流程（v6.0 核心）
+
+> **铁律**: `NO SKILL WITHOUT A FAILING TEST FIRST`
+>
+> 在编写任何技能内容之前，必须先观察 Agent 在没有技能时的失败行为。
+
+### 完整流程
 
 ```
-研究(research) → 分析(analyze) → 规划(plan) → 生成(generate) → 打包(package)
+🔴 RED（观察失败）→ 🟢 GREEN（编写技能）→ 🔵 REFACTOR（修补漏洞）
+         ↓                    ↓                      ↓
+   压力场景测试          最小可行技能           反合理化设计
+   记录违规行为          验证Agent合规          重测试至通过
+         ↓                    ↓                      ↓
+    ┌─────────────────────────────────────────────────┐
+    │           原有生产流水线（研究→分析→规划→生成→打包）     │
+    └─────────────────────────────────────────────────┘
+                              ↓
+                       发布 + 版本管理
 ```
+
+### Phase 0: 🔴 RED — 观察失败（必须第一步）
+
+**目标**: 证明"没有这个技能时 Agent 会失败"。
+
+#### 0.1 设计压力场景
+
+创建 3+ 个模拟真实高压力的使用场景：
+
+| 压力类型 | 示例 | 触发心理 |
+|---------|------|---------|
+| **时间压力** | "生产环境宕机，每分钟损失 $15k" | 走捷径诱惑 |
+| **权威压力** | "经理说：现在就修复" | 服从权威跳过流程 |
+| **疲劳/厌倦** | "这是第 10 个类似的技能了" | 省略步骤 |
+| **过度自信** | "这很明显不需要测试" | 跳过验证 |
+
+#### 0.2 运行基线测试（无技能）
+
+使用子代理执行压力场景，**逐字记录**：
+
+```markdown
+## 基线测试记录模板
+
+**日期**: YYYY-MM-DD
+**测试场景**: [场景名称]
+**子代理 ID**: [ID]
+
+**观察到的行为**:
+- Agent 做了什么？（具体动作）
+- 违反了哪些规则？
+- 给出了什么合理化借口？（逐字记录）
+
+**违规模式识别**:
+- 模式1: [描述]
+- 模式2: [描述]
+```
+
+#### 0.3 识别模式
+
+总结 Agent 的常见失败策略：
+- 它倾向于跳过哪些步骤？
+- 它常用什么借口？
+- 在什么压力下最容易违反规则？
+
+> 📖 **详细方法论**: [../../references/writing-rules.md](../../references/writing-rules.md) — R8: TDD 驱动技能创建
+
+---
+
+### 传统生产流水线（在 RED 之后执行）
+
+完成 RED 阶段后，按以下流水线生成技能初稿：
 
 ### 入口分流
 
@@ -123,6 +189,70 @@ dependency:
 | ≥70 | ✅ 合格，可进入发布 |
 | 60-69 | ⚠️ 可发布但建议优化，回调 generator（最多 2 轮） |
 | <60 | ❌ 不合格，必须修复 |
+
+### Phase 1: 🟢 GREEN — 验证技能效果
+
+**目标**: 证明"有这个技能时 Agent 会遵守规则"。
+
+#### 1.1 用技能重新测试
+
+使用在 RED 阶段创建的相同压力场景，但这次**加载你编写的技能**：
+
+```bash
+# 伪代码示例
+run_subagent(
+  scenario: pressure_test_1,
+  skills: [your_new_skill],
+  expected_behavior: compliance_with_rules
+)
+```
+
+#### 1.2 检查合规性
+
+| 检查项 | 通过标准 |
+|--------|---------|
+| Agent 遵守了核心规则？ | ✅ 是 |
+| 没有使用 RED 阶段的借口？ | ✅ 是 |
+| 在压力下仍能正确执行？ | ✅ 是 |
+
+#### 1.3 如果不通过
+
+回到 Step 4（生成），修改技能内容：
+- 只针对失败的测试用例修改
+- 不要过度设计
+- 保持最小化原则
+
+> 📖 **反合理化设计**: [../../references/writing-rules.md](../../references/writing-rules.md) — R10: 反合理化设计模式
+
+---
+
+### Phase 2: 🔵 REFACTOR — 修补漏洞
+
+**目标**: 发现并修补 Agent 找到的新漏洞。
+
+#### 2.1 寻找新合理化方式
+
+Agent 可能会找到新的绕过方式。常见的新漏洞：
+
+```markdown
+## 新发现的合理化方式
+
+- "这次情况特殊..." → 添加："无例外，特殊情况也要走流程"
+- "我是按精神不是按字面..." → 添加："违反字面 = 违反精神"
+- "时间不够完整流程..." → 添加："时间紧 = 更要遵循流程（避免返工）"
+```
+
+#### 2.2 更新技能
+
+为每个新漏洞添加明确的禁止规则。
+
+#### 2.3 重验证
+
+再次运行所有压力场景，直到全部通过。
+
+#### 2.4 合理化对照表
+
+最终输出一个完整的合理化对照表（见 writing-rules.md R10）。
 
 ---
 
