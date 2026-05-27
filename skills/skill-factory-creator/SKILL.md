@@ -283,11 +283,59 @@ Agent 可能会找到新的绕过方式。常见的新漏洞：
 - 行数变化 <5% 触发警告，提示可能已过度优化
 - Type 1 技能默认**跳过加工阶段**（快速路径）
 
-### 拆分模式
+### 转交协议：复杂技能拆分
 
-当技能过于复杂时（>800 行或多个独立模块），需要拆分为技能族。详见 **[技能整合器](../skill-factory-assembler/SKILL.md)** 的拆分章节（三种拆分维度 + 验证清单）。
+当检测到以下**任一条件**时，creator 应停止执行并转交 assembler：
 
-> 📖 详见: [../skill-factory-assembler/SKILL.md](../skill-factory-assembler/SKILL.md) — 拆分（Split）章节
+#### 触发条件（满足任一即转交）
+
+| 条件 | 阈值 | 说明 |
+|------|------|------|
+| **行数超标** | 当前技能 >800 行或预计 >500 行 | 单一 SKILL.md 无法有效维护 |
+| **多独立模块** | 识别到 ≥3 个独立功能域 | 应该拆分为独立子技能 |
+| **用户明确要求** | 用户说"拆开"、"分离"、"分成多个" | 显式拆分需求 |
+| **类型判定为 Type 4** | 重+厚且多模块 | 架构上需要 skills/ 目录 |
+
+#### 转交流程
+
+```
+Creator 检测到触发条件
+    ↓
+暂停当前加工流程
+    ↓
+生成转交报告:
+┌─────────────────────────────────────┐
+│ 📋 技能转交报告                      │
+├─────────────────────────────────────┤
+│ 来源: skill-factory-creator          │
+│ 目标: skill-factory-assembler        │
+│ 原因: [具体触发条件]                 │
+│ 当前状态: [已完成的工作]             │
+│ 建议操作: [拆分维度建议]             │
+└─────────────────────────────────────┘
+    ↓
+调用 assembler 继续处理
+    ↓
+[assembler 完成后可返回 creator 进行验证]
+```
+
+#### 转交后的协作模式
+
+```mermaid
+flowchart LR
+    A[Creator 加工] -->|触发条件| B[暂停+生成报告]
+    B --> C[Assembler 拆分]
+    C --> D[返回 Creator 验证]
+    D --> E[Publisher 发布]
+    
+    style A fill:#4CAF50,color:#fff
+    style C fill:#FF9800,color:#fff
+    style E fill:#2196F3,color:#fff
+```
+
+> 💡 **设计原则**: Creator 专注"创建和加工"，Assembler 独占"合并和拆分"。通过标准化转交协议实现无缝协作。
+>
+> 📖 **详见**: [../skill-factory-assembler/SKILL.md](../skill-factory-assembler/SKILL.md) — 完整的合并/拆分方法论
 
 ---
 

@@ -1,13 +1,18 @@
 ---
 name: skill-factory-assembler
-version: v0.5.1
+version: v0.6.0
 author: skill-factory
-description: 技能整合器 — 负责多技能合并与复杂技能拆分，提供序列模式（A→B→C 有依赖）、并行模式（A/B/C 独立执行）、嵌套模式（B 嵌入 A 子流程）三种合并策略，以及按功能域、使用场景、用户角色三维拆分方法论，确保合并拆分后均满足三层架构铁律且可独立运行
+description: Use when merging multiple skills or splitting complex skills — provides sequential/parallel/nested merge strategies and function/scene/role-based split methodology while enforcing three-layer architecture constraints
 tags: [skill-factory, assembler, merge, split, assembly, integration, layer-1]
 dependency:
   parent: skill-factory
   layer: 1
   phase: assembly
+  meta:
+    complexity: advanced
+    tdd_status: validated
+    last_audit_date: "2026-05-27"
+    audit_score: 92
 ---
 # 技能整合器
 

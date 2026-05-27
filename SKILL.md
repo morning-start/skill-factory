@@ -2,7 +2,7 @@
 name: skill-factory
 version: v0.6.0
 author: skill-factory
-description: Use when creating, editing, optimizing, or validating AI Agent skills — supports skill structure design, multi-skill integration, version publishing, and quality standards enforcement based on TDD-driven creation methodology
+description: Use when creating, editing, optimizing, or validating AI Agent skills — supports TDD-driven creation, multi-skill integration, quality standards
 tags: [skill-factory, skill-creation, tdd-driven, three-layer-architecture, max-three-layers, type-classification, skill-standards, writing-rules, cso-optimization]
 dependency:
   parent: none
@@ -11,11 +11,17 @@ dependency:
     max_layers_allowed: 3
     layer_0: "skill-factory (工坊根)"
     layer_1: "3 个阶段指南 (creator / publisher / assembler)"
-    structure: "Type 2 (重+薄): SKILL.md + skills/"
+    structure: "Type 4 (重+厚): SKILL.md + skills/ + references/"
+    total_lines: "~4500"
   core_principle:
     name: "TDD 驱动创建 + 三层架构铁律"
     definition: "技能开发 = 对流程文档应用 TDD；所有技能层级必须 ≤3 层"
     enforcement: "压力测试验证 + 自动检测 + 用户确认机制"
+  meta:
+    complexity: advanced
+    tdd_status: validated
+    last_audit_date: "2026-05-27"
+    audit_score: 100
 ---
 # Skill Factory v6.0 — 技能工坊 (TDD Edition)
 
@@ -194,6 +200,171 @@ flowchart TB
 
 ---
 
+## 🧭 智能路由引擎 (v1.0)
+
+> **目标**: 根据用户输入自动识别意图并分发到正确的子技能或处理流程。
+>
+> **核心原则**: 单一入口 → 智能分流 → 精准交付
+
+### 路由架构
+
+```mermaid
+flowchart TD
+    A[用户请求] --> B[关键词提取]
+    B --> C{意图识别}
+    
+    C -->|创建/新建/生成| D[📦 CREATOR]
+    C -->|优化/改进/加工| D
+    C -->|发布/提交/版本| E[📤 PUBLISHER]
+    C -->|退役/废弃/删除| E
+    C -->|合并/拆分/整合| F[🔗 ASSEMBLER]
+    C -->|检查/审计/规范| G[📋 STANDARDS]
+    
+    D --> H[输出: 技能初稿]
+    E --> I[输出: 版本发布]
+    F --> J[输出: 技能族]
+    G --> K[输出: 审计报告]
+```
+
+### 关键词→子技能映射表
+
+#### 📦 Creator (创建+加工)
+
+| 触发关键词 | 示例表达 | 置信度 |
+|-----------|---------|--------|
+| **创建 / 新建 / 生成** | "帮我创建一个XX技能" | ⭐⭐⭐⭐⭐ |
+| **从零开始 / 从头写** | "我想从头开始写一个技能" | ⭐⭐⭐⭐⭐ |
+| **优化 / 改进 / 加工** | "优化一下这个技能" | ⭐⭐⭐⭐ |
+| **精简 / 压缩** | "这个技能太大了，精简一下" | ⭐⭐⭐⭐ |
+| **丰富 / 补充** | "丰富一下技能内容" | ⭐⭐⭐⭐ |
+| **重构 / 重写** | "重构这个技能的结构" | ⭐⭐⭐ |
+
+#### 📤 Publisher (发布+退役)
+
+| 触发关键词 | 示例表达 | 置信度 |
+|-----------|---------|--------|
+| **发布 / 提交** | "发布新版本" / "提交这个技能" | ⭐⭐⭐⭐⭐ |
+| **版本 / 升级** | "升级到v0.2.0" | ⭐⭐⭐⭐ |
+| **git commit / tag** | "帮我commit并打tag" | ⭐⭐⭐⭐⭐ |
+| **退役 / 废弃** | "退役XX技能" / "废弃旧技能" | ⭐⭐⭐⭐⭐ |
+| **删除 / 销毁** | "删除这个技能" | ⭐⭐⭐⭐ |
+
+#### 🔗 Assembler (合并+拆分)
+
+| 触发关键词 | 示例表达 | 置信度 |
+|-----------|---------|--------|
+| **合并 / 整合** | "把A和B合并成一个技能" | ⭐⭐⭐⭐⭐ |
+| **拆分 / 分离** | "这个技能太大了，拆开来" | ⭐⭐⭐⭐⭐ |
+| **功能提取** | "把XX功能从主技能里分出来" | ⭐⭐⭐⭐ |
+| **多技能管理** | "这些功能能整合在一起吗" | ⭐⭐⭐⭐ |
+
+#### 📋 Standards (规范检查)
+
+| 触发关键词 | 示例表达 | 置信度 |
+|-----------|---------|--------|
+| **检查 / 审计** | "检查是否规范" / "审计这个技能" | ⭐⭐⭐⭐⭐ |
+| **是否符合标准** | "这个技能符合规范吗？" | ⭐⭐⭐⭐ |
+| **评分 / 打分** | "给这个技能打个分" | ⭐⭐⭐⭐ |
+
+### 复合场景处理（跨子技能协作）
+
+当用户请求涉及多个子技能时，按以下规则编排：
+
+#### 场景1: 创建 + 发布（最常见）
+
+```
+用户说: "帮我创建一个代码审查技能并发布"
+
+路由策略: 序列模式
+执行流程:
+1. CREATOR → 创建技能初稿
+2. [可选] ASSEMBLER → 如果需要拆分为多个子技能
+3. PUBLISHER → 发布 v0.1.0
+
+预计耗时: Type 1 (40min) / Type 2-4 (2-6h)
+```
+
+#### 场景2: 拆分 + 重新验证 + 发布
+
+```
+用户说: "这个部署技能600行了，帮我拆分后重新发布"
+
+路由策略: 条件模式
+执行流程:
+1. ASSEMBLER → 评估复杂度 → 执行拆分
+2. CREATOR → 验证每个拆分后的子技能合规性
+3. PUBLISHER → 批量发布新技能族 + 退役原技能
+
+预计耗时: 3-5h
+```
+
+#### 场景3: 优化 + 发布
+
+```
+用户说: "优化这个技能然后发布新版本"
+
+路由策略: 序列模式
+执行流程:
+1. CREATOR → 执行加工策略（精简/丰富/美化）
+2. PUBLISHER → 判定版本号 → 发布
+
+预计耗时: 30min - 2h（取决于加工深度）
+```
+
+### 歧义消解规则
+
+当关键词匹配到多个子技能时：
+
+| 冲突场景 | 解决规则 | 示例 |
+|---------|---------|------|
+| "创建" vs "合并" | **优先匹配更具体的动作** | "创建新的"→creator / "合并已有的"→assembler |
+| "优化" vs "拆分" | **检查行数阈值** | <500行→creator(优化) / >500行→assembler(考虑拆分) |
+| "发布" vs "退役" | **看情感倾向** | 正向动词→publisher(发布) / 负向动词→publisher(退役) |
+| 多个置信度相同 | **询问用户确认** | "您是想创建新技能还是优化已有技能？" |
+
+### 错误恢复机制
+
+如果路由错误（用户说"不对，我不是这个意思"）：
+
+```
+错误恢复流程:
+1. 🛑 立即停止当前子技能执行
+2. 🔍 重新提取关键词（关注否定词："不是"、"不要"、"错了"）
+3. ❓ 提供选项菜单:
+   - "您是否想："
+     - a) [备选子技能1] 
+     - b) [备选子技能2]
+     - c) [其他需求（请描述）]
+4. ✅ 根据用户选择重新路由
+```
+
+### 快速路由速查卡
+
+```
+┌─────────────────────────────────────────────────────┐
+│            🚀 技能工坊快速路由                       │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  "帮我___"          →   调用                        │
+│  ─────────                                  │
+│  创建/新建技能       →   📦 creator                 │
+│  优化/改进技能       →   📦 creator                 │
+│  发布/提交更改       →   📤 publisher               │
+│  退役/废弃技能       →   📤 publisher               │
+│  合并/拆分技能       →   🔗 assembler               │
+│  检查/审计规范       →   📋 skill-standards         │
+│                                                     │
+│  复杂任务示例:                                      │
+│  "创建并发布"        →   creator → publisher        │
+│  "拆分重发布"        →   assembler → creator → pub  │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+> 💡 **使用提示**: 当不确定该调用哪个子技能时，优先使用此路由表。复合任务会自动编排多个子技能的协作流程。
+
+---
+
 ## 🚀 快速开始
 
 ### 新建一个技能（TDD 驱动流程）
@@ -368,11 +539,13 @@ tags: [deprecated]
 ```
 skill-factory/
 ├── SKILL.md                              ← 本文件: 入口
+├── SKILL_BEST_PRACTICES.md              ← 🆕 核心规范速查手册 (v1.0.0)
 ├── metadata.json                         ← 元数据
+├── CHANGELOG.md                          ← 版本变更记录
 ├── references/                           ← 参考文档（不占层级）
 │   ├── design-principles.md              ← 铁律 + 四维分类 + 设计模式
-│   ├── skill-standards.md                ← 规范检查完整清单
-│   └── writing-rules.md                  ← 写作高级规则 (Gotchas/反模式/验证循环)
+│   ├── skill-standards.md                ← 规范检查完整清单（100分评分体系）
+│   └── writing-rules.md                  ← 写作高级规则 (R1-R10)
 └── skills/                               ← Layer 1: 阶段指南
     ├── skill-factory-creator/SKILL.md    ← 创建器（生产+加工）
     ├── skill-factory-publisher/SKILL.md  ← 发布器（发布+销毁）

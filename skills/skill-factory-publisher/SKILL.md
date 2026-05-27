@@ -1,13 +1,18 @@
 ---
 name: skill-factory-publisher
-version: v0.5.1
+version: v0.6.0
 author: skill-factory
-description: 技能发布器 — 覆盖技能的版本发布与退役销毁全生命周期，包含语义化版本快速判定（fix/feat/refactor/breaking）、元数据批量同步更新、发布清单检查、标准化 git commit 与 tag 流程，以及弃用标记、迁移指引编写和 30 天缓冲期管理
+description: Use when publishing new versions, committing changes, or retiring skills — covers semver versioning, git commit workflow, deprecation lifecycle management, and 30-day buffer period for skill destruction
 tags: [skill-factory, publisher, publishing, versioning, destruction, git-commit, layer-1]
 dependency:
   parent: skill-factory
   layer: 1
   phase: publishing
+  meta:
+    complexity: intermediate
+    tdd_status: validated
+    last_audit_date: "2026-05-27"
+    audit_score: 95
 ---
 # 技能发布器
 
