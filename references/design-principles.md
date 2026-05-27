@@ -1,7 +1,7 @@
 # 设计原则详解
 
-> **来源**: [../SKILL.md](../SKILL.md) → 三层架构铁律 + 四维分类 + 设计模式 + 发布路径  
-> **版本**: v0.5.1
+> **来源**: [../SKILL.md](../SKILL.md) → 四级渐进加载 + 三层目录铁律 + 四维分类 + 设计模式 + 发布路径  
+> **版本**: v0.6.0
 
 ---
 
@@ -187,32 +187,90 @@ type_4:
 
 ---
 
-## 6. 三级渐进加载系统 (Progressive Disclosure)
+## 6. 四级渐进加载系统 (Progressive Disclosure)
 
-> **来源**: [agentskills.io 官方规范](https://agentskills.io/specification) + SKILL.md Pattern 实战验证
+> **来源**: [agentskills.io 官方规范](https://agentskills.io/specification) + AQUA 日本 Agent Skills 完全ガイド + SKILL.md Pattern 实战验证
 > **核心**: 技能内容按需加载，理解此机制 = 理解"为什么技能不触发"和"为什么上下文爆了"
+> **v0.6.0 更新**: 从三级(L1/L2/L3)升级为四级，新增 L4 Script 执行层（源自 AQUA 四层架构模型）
 
-### 三级架构 (L1 / L2 / L3)
+### 四级架构 (L1 / L2 / L3 / L4)
 
-| 层级 | 名称 | 加载时机 | Token 预算 | 内容 | 作用 |
+| 层级 | 名称 | 加载时机 | Token 消耗 | 内容 | 作用 |
 |------|------|---------|-----------|------|------|
-| **L1** | Metadata | 启动时（始终） | ~100/skill | name + description | Agent 决定是否激活 |
-| **L2** | Instructions | 触发匹配时 | <5,000 | SKILL.md 全文 | Agent 知道怎么做 |
-| **L3** | Resources | 按需引用时 | 不限 | references/ + scripts/ + assets/ | 提供深度知识/执行操作 |
+| **L1** | Metadata | 启动时（始终） | ~100 tokens | name + description | Agent 决定是否激活 |
+| **L2** | Instructions | 触发匹配时 | <5,000 tokens | SKILL.md 全文 | Agent 知道怎么做 |
+| **L3** | Resources | 按需引用时 | 可变 | references/ + assets/ | 提供深度知识/参考文档 |
+| **L4** | **Scripts** | **仅执行时** | **零** | scripts/ (PS/Py/SH/JS) | **执行操作不读内容** |
 
 ```mermaid
 flowchart LR
     L1["📋 L1: Metadata<br/>~100 tokens<br/>始终加载"] -->|"description 匹配"| L2["📖 L2: Instructions<br/><5k tokens<br/>触发后加载"]
-    L2 -->|"引用路径"| L3["⚡ L3: Resources<br/>按需懒加载<br/>零 idle 开销"]
+    L2 -->|"引用路径"| L3["📚 L3: Resources<br/>按需懒加载<br/>可变 tokens"]
+    L3 -->|"调用命令"| L4["⚡ L4: Scripts<br/>Execution-Only<br/>零 token 开销"]
 ```
+
+### L4 Script 层详解
+
+> **来源**: [AQUA LLC](https://aquallc.jp) — Agent Skills 完全ガイド (日本)
+> **核心理念**: 脚本在执行时不占用上下文窗口——Agent 调用脚本 → 脚本独立运行 → 返回结果文本
+
+#### 为什么需要独立的 L4 层
+
+在旧的三级模型中，`scripts/` 和 `references/`、`assets/` 同属 L3。但它们有本质区别：
+
+| 维度 | references/ (L3) | scripts/ (L4) |
+|------|-------------------|---------------|
+| **消费方式** | Agent **读取**文件内容到上下文 | Agent **调用**脚本执行，只接收输出 |
+| **Token 成本** | 文件大小 = Token 消耗 | **零**（脚本运行在外部进程） |
+| **适用场景** | 知识型：模板/规范/指南 | 操作型：审计/生成/转换/部署 |
+| **Agent 角色** | 读者（理解后决策） | 调用者（发起→等待结果） |
+| **上下文污染** | 有（内容进入 context window） | 无（只有结果返回） |
+
+#### L4 脚本设计原则
+
+| 原则 | 说明 | 示例 |
+|------|------|------|
+| **零上下文依赖** | 脚本应自包含，不依赖 Agent 的内部状态 | audit.ps1 接收 `-Path` 参数而非假设当前目录 |
+| **结构化输出** | 输出应易于解析（表格/JSON/分级） | audit.ps1 输出 `[+]`/`[!]`/`[-]` 前缀 + 分数汇总 |
+| **幂等性** | 多次运行结果一致 | validate 脚本对同一输入始终返回相同结果 |
+| **错误友好** | 失败时给出明确修复建议而非堆栈跟踪 | "Missing SKILL.md at {path}" 而非 `FileNotFoundException` |
+
+#### L4 与 L3 的协作模式
+
+```
+典型工作流:
+
+  L2 (SKILL.md) 指导 Agent 决策
+       ↓
+  "运行审计" → 调用 L4: scripts/audit.ps1
+       ↓
+  audit.ps1 输出: "72/100, Grade B"
+       ↓
+  Agent 根据结果决定:
+    ├─ 需要了解评分细则? → 加载 L3: references/audit-criteria.md
+    └─ 分数足够? → 直接基于 L2 规则继续操作
+```
+
+**关键设计**: L4 先行（快速获取客观结果），L3 按需（仅在需要深度知识时加载），最大化 Token 效率。
+
+#### L4 支持的脚本类型
+
+| 类型 | 扩展名 | 典型用途 | skill-factory 实例 |
+|------|--------|---------|-------------------|
+| PowerShell | `.ps1` | Windows 环境/审计/文件操作 | `processor/scripts/audit.ps1` |
+| Python | `.py` | 数据处理/复杂逻辑/跨平台 | (待扩展) |
+| Shell | `.sh` | Linux/Mac CI/CD | (待扩展) |
+| JavaScript | `.js` | Node.js 生态/JSON 处理 | (待扩展) |
 
 ### 对写技能意味着什么
 
 - **description 是唯一触发信号** — 写得不好，技能永远不会被自动激活
 - **SKILL.md 建议 <500 行, <5k tokens** — 这是 L2 的预算上限
-- **重资源放 references/ scripts/ assets/** — 仅在 L3 按需加载，不污染上下文
+- **重知识放 references/** — 仅在 L3 按需加载，不污染上下文
+- **重操作放 scripts/** — L4 执行层零 Token 开销，适合审计/生成/批量任务
 - **一个仓库可装 50+ Skills** — L1 阶段只占 ~100 tokens/skill，开销极小
 - **idle 时零 token 开销** — 未触发的技能不占任何上下文
+- **L4 是免费的性能加速器** — 能用脚本做的操作不要写在 SKILL.md 里
 
 ### 关键设计原则 (来自 agentskills.io best-practices)
 
@@ -244,8 +302,9 @@ flowchart LR
 
 | 原则 | 说明 |
 |------|------|
-| **SKILL.md <500 行** | 确保完整加载后不占用过多 context window |
-| **详细内容放 references/** | 大段参考信息仅在执行阶段按需加载 |
+| **SKILL.md <500 行** | 确保完整加载后不占用过多 context window（L2 预算） |
+| **详细内容放 references/** | 大段参考信息仅在执行阶段按需加载（L3 懒加载） |
+| **操作逻辑放 scripts/** | 可执行的审计/生成/转换任务走 L4 零 Token 路径 |
 | **每个 section 可自辩** | 如果说不清某个章节为什么需要存在，就删掉它 |
 | **精简优先于丰富** | 新技能先写最小可行版本（MVP），不够再补，而非先塞满再删 |
 | **表格 > 段落** | AI 解析结构化数据比阅读长段落更准确、更省 token |
@@ -253,8 +312,9 @@ flowchart LR
 ### Token 效率自检
 
 ```
-✅ SKILL.md <500 行
-✅ 大段内容在 references/，有明确引用路径
+✅ SKILL.md <500 行 (L2 预算内)
+✅ 大段知识在 references/，有明确引用路径 (L3)
+✅ 操作型任务有 scripts/ 支持 (L4)
 ✅ 每个章节都能回答"用户会怎么用到这个信息"
 ✅ 表格和列表优先于自然语言段落
 ```
