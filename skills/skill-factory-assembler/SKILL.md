@@ -1,6 +1,6 @@
 ---
 name: skill-factory-assembler
-version: v2.0.1
+version: v2.1.0
 author: skill-factory
 description: Use when merging, splitting, combining, integrating, or restructuring multiple AI Agent skills. Triggers on "merge skills", "split skills", "combine skills", "integrate skills", "restructure skills", or "skill assembly"
 tags: [skill-merging, skill-splitting, skill-restructuring, integration, skill-factory]
@@ -16,7 +16,7 @@ meta:
   tdd_waiver_reason: "协调器型技能，核心TDD流程在 creator/references/tdd-guide.md 中。当前为 v2.0.1 稳定版，待后续补充完整压力测试记录"
   tdd_waiver_date: "2026-05-27"
 ---
-# 🔗 Skill Factory Assembler — 技能整合器 v2.0.1
+# 🔗 Skill Factory Assembler — 技能整合器 v2.1.0
 
 > **定位**: 多技能合并与拆分的架构重组器
 > **架构**: 自含型子技能 + references/ 详细参考
@@ -62,7 +62,8 @@ meta:
 功能独立无依赖? → 并行合并
 一个是另一个的子流程? → 嵌套合并
 复杂混合? → 组合模式
-```
+
+> 🎯 **EvoSkill 多候选评估**: 当存在多种可行合并策略时（如顺序 vs 并行 vs 核心提取），启用 EvoSkill 模式生成 2-3 个候选方案，通过 6 维评分卡自动选优。详见 [references/evoskill-eval.md](references/evoskill-eval.md)
 
 > 📖 **详细操作步骤 + 示例**: [references/merge-patterns.md](references/merge-patterns.md)
 
@@ -85,7 +86,8 @@ meta:
 使用场景差异大? → 按场景拆分
 用户角色不同? → 按角色拆分
 多种因素混合? → 主维度 + 辅助维度
-```
+
+> 🎯 **EvoSkill 多候选评估**: 当存在多种可行拆分维度时（如功能 vs 场景 vs 角色），启用 EvoSkill 模式生成 2-3 个候选方案，通过 6 维评分卡自动选优。详见 [references/evoskill-eval.md](references/evoskill-eval.md)
 
 > 📖 **详细操作步骤 + 示例**: [references/split-patterns.md](references/split-patterns.md)
 
@@ -110,6 +112,7 @@ meta:
 3. **先评估再行动**: 不是所有技能都适合合并或拆分
 4. **保持向后兼容**: 已使用的技能拆分时保留原入口
 5. **渐进式重组**: 大型重构可分多步完成
+6. **策略模糊时用 EvoSkill**: 当多种合并/拆分策略都可行且难以直观判断时，使用 EvoSkill 多候选评估模式自动选优
 
 ---
 
@@ -117,10 +120,11 @@ meta:
 
 ```
 skills/skill-factory-assembler/
-├── SKILL.md                      ← 本文件（协调器 ~200行）
+├── SKILL.md                      ← 本文件（协调器 ~220行）
 └── references/
     ├── merge-patterns.md         ← 序列/并行/嵌套合并详解
-    └── split-patterns.md         ← 功能/场景/角色拆分详解
+    ├── split-patterns.md         ← 功能/场景/角色拆分详解
+    └── evoskill-eval.md          ← 多候选评估方法论（Creator→Evaluator→Refiner）
 ```
 
 ## 🔗 相关资源
@@ -130,6 +134,7 @@ skills/skill-factory-assembler/
 | 设计原则 | [../references/design-principles.md](../references/design-principles.md) | 整合模式选择 |
 | 写作规则 | [../references/writing-rules.md](../references/writing-rules.md) | R1-R14 完整规则 |
 | 最佳实践 | [../references/best-practices.md](../references/best-practices.md) | 项目知识枢纽 |
+| **EvoSkill 评估** | [references/evoskill-eval.md](references/evoskill-eval.md) | **多候选方案生成与6维评分选优** |
 
 ---
 
@@ -137,5 +142,6 @@ skills/skill-factory-assembler/
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| **v2.1.0** | 2026-05-27 | **新增**: EvoSkill 三 Agent 评估模式（Creator→Evaluator→Refiner）；新增 references/evoskill-eval.md；合并/拆分流程支持多候选方案生成与6维评分选优 |
 | **v2.0.1** | 2026-05-27 | **优化**: 拆分 references/(2文件)；修复死链(subskill-design已删)；添加 TDD 豁免；行数 549→~200 |
 | **v2.0.0** | 2026-05-27 | 初始版本：单文件双向协调器；3种合并模式 × 3种拆分维度 |
