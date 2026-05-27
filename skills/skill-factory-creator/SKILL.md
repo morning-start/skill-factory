@@ -1,6 +1,6 @@
 ---
 name: skill-factory-creator
-version: v2.0.0
+version: v2.1.0
 author: skill-factory
 description: Use when creating new AI Agent skills from scratch, writing SKILL.md files, or starting skill development with TDD. Triggers on "create a skill", "new skill", "write SKILL.md", "from zero", "build a skill", "skill creation", "TDD for skills", or "start a new agent skill"
 tags: [skill-creation, tdd-driven, skill-factory, type-classification, template-selection]
@@ -16,7 +16,7 @@ meta:
   tdd_waiver_reason: "协调器型技能，内置 Type1 快速路径(简化TDD)和完整 TDD 流程指引。详细 TDD 操作见 references/tdd-guide.md"
   tdd_waiver_date: "2026-05-27"
 ---
-# 📦 Skill Factory Creator — 技能创建器 v2.0
+# 📦 Skill Factory Creator — 技能创建器 v2.1
 
 > **定位**: 从零创建新技能的完整工作流协调器
 > **架构**: 自含型子技能（可独立通过 `/creator` 触发）
@@ -445,5 +445,6 @@ skills/skill-factory-creator/
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| **v2.1.0** | 2026-05-27 | **新增 CSO Eval Query 方法论**: references/tdd-guide.md 新增"CSO 触发率评估方法论"完整章节（Eval Query 设计规范、手动评估流程、迭代优化循环、与 TDD 协作关系）；支持用户自行量化评估 description 触发准确率 |
 | **v2.0.0** | 2026-05-27 | **v2.0 架构重构**: 从 orchestrator 模式重构为自含型 coordinator；整合 TDD 流程、类型判定、模板选择；新增 Type 1 快速路径；引用全局 references + 自含 references；可独立通过 `/creator` 触发 |
 | v1.0.0 | 2026-05-27 | 初始版本（orchestrator + workers 模式，已废弃） |

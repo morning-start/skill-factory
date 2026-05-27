@@ -1,7 +1,7 @@
 # TDD 驱动技能创建 — 完整指南
 
 > **来源**: [../SKILL.md](../SKILL.md) → TDD 流程
-> **版本**: v2.0.0
+> **版本**: v2.1.0
 > **基于**: Superpowers 方法论 (TDD + CSO) / agentskills.io 最佳实践
 
 ---
@@ -303,5 +303,260 @@ meta:
 
 ---
 
-> 📖 **写作规则**: [../writing-rules.md](../writing-rules.md) — R8(TDD) + R10(反合理化)
+## CSO 触发率评估方法论（Eval Query Design）
+
+> **来源**: 官方 skill-creator (anthropics/skills) / agentskills.io 优化指南
+> **目的**: 用结构化的 Eval Query 集合量化评估 description（CSO）的触发准确率
+> **与 TDD 的关系**: TDD 验证"技能内容是否正确工作"，CSO Eval 验证"技能是否在正确时机被触发"
+
+### 为什么需要 CSO Eval
+
+TDD 三阶段（RED/GREEN/REFACTOR）解决的是**技能内容质量**问题。但一个再完美的技能，如果 Agent 在用户需要时**不触发它**，就毫无价值。
+
+```
+技能价值 = 内容质量(TDD) × 触发准确率(CSO Eval)
+         ↑ 已有完整方法论     ↑ 本章节新增
+```
+
+### 核心概念
+
+| 概念 | 定义 | 示例 |
+|------|------|------|
+| **Should-trigger query** | 应该触发该技能的用户输入 | "帮我创建一个新的 AI 技能" → 应触发 skill-factory-creator |
+| **Should-not-trigger query** | 不应该触发该技能的用户输入 | "帮我写个 Python 脚本" → 不应触发 skill-factory-creator |
+| **Trigger rate** | 触发率 = 触发次数 / 总运行次数 | 0.8 = 80% 概率被触发 |
+| **False positive** | 误触发：不该触发却触发了 | 查日志却触发了代码生成技能 |
+| **False negative** | 漏触发：该触发却没触发 | 创建技能却没触发 creator |
+
+### Eval Query 设计规范
+
+#### Should-trigger Queries（8-10 个）
+
+从以下 4 个维度设计正例：
+
+| 维度 | 设计要点 | 示例（以 creator 为例） |
+|------|---------|----------------------|
+| **措辞变化** | 正式/随意/错别字/缩写/中英混杂 | "创建技能" / "建个skill" / "新建skiil" / "make a skill" |
+| **明确度变化** | 直接命名 vs 描述需求而不命名 | "用creator做个技能" vs "我需要一个能帮 Claude 学新能力的工具" |
+| **细节程度** | 简短 prompt + 重 context prompt | "建个技能" vs (附带详细需求文档) "基于这个需求创建技能" |
+| **复杂度变化** | 单步 vs 多步骤嵌入链 | "创建技能" vs "先分析这个工具能不能做成 skill，然后创建它" |
+
+**设计模板**：
+
+```json
+{
+  "id": "st-01",
+  "type": "should-trigger",
+  "dimension": "措辞变化",
+  "variant": "正式",
+  "prompt": "请帮我创建一个新的 AI Agent Skill",
+  "expected_trigger": true,
+  "notes": "最标准的触发方式，必须通过"
+}
+```
+
+#### Should-not-trigger Queries（8-10 个）
+
+**最有价值的类型是近误（Near-miss）**——与目标技能共享关键词但实际需要不同技能：
+
+| 近误类型 | 设计方法 | 示例（以 creator 为例） |
+|---------|---------|----------------------|
+| **同域不同操作** | 共享领域词但动作不同 | "修改这个 SKILL.md" → 应触发 processor 非 creator |
+| **同词不同义** | 关键词相同但语义不同 | "写个脚本来自动化" → 不是创建 Skill |
+| **泛化请求** | 更宽泛的需求可能匹配多个技能 | "优化我的开发流程" → 不特指创建新技能 |
+| **跨技能边界** | 处于两个技能的模糊地带 | "把这个功能封装成可复用的" → 可能是 assembler |
+
+**设计模板**：
+
+```json
+{
+  "id": "snt-01",
+  "type": "should-not-trigger",
+  "dimension": "近误: 同域不同操作",
+  "variant": "加工请求",
+  "prompt": "帮我优化一下现有的 skill-factory-processor",
+  "expected_trigger": false,
+  "target_skill": "processor",
+  "notes": "包含 'skill' 关键词但动作是'优化'非'创建'"
+}
+```
+
+### Eval Query 套件标准结构
+
+完整的 Eval Query 文件应放在 `evals/evals.json`：
+
+```json
+{
+  "skill_name": "your-skill-name",
+  "description_summary": "一句话描述该技能做什么",
+  "created_date": "2026-05-27",
+  "queries": {
+    "should_trigger": [
+      {
+        "id": "st-01",
+        "prompt": "...",
+        "dimension": "措辞变化",
+        "variant": "正式"
+      },
+      {
+        "id": "st-02",
+        "prompt": "...",
+        "dimension": "明确度变化",
+        "variant": "间接描述"
+      }
+    ],
+    "should_not_trigger": [
+      {
+        "id": "snt-01",
+        "prompt": "...",
+        "dimension": "近误",
+        "variant": "同域不同操作",
+        "reason": "应触发 {other-skill}"
+      }
+    ]
+  },
+  "split": {
+    "train_ratio": 0.6,
+    "validation_ratio": 0.4
+  }
+}
+```
+
+**数量要求**：
+
+| 类别 | 最少 | 推荐 | 上限 |
+|------|------|------|------|
+| should-trigger | 8 | 10 | 15 |
+| should-not-trigger | 8 | 10 | 15 |
+| **总计** | **16** | **20** | **30** |
+
+### 手动评估流程
+
+在没有自动化 eval 引擎的情况下，按以下流程手动执行 CSO 评估：
+
+#### 第一步：准备 Query 套件（15 min）
+
+1. 按 4 维度 × 2 类型设计 20 条 query
+2. 标注每条的 dimension 和 variant
+3. 按 60%/40% 分为训练集和验证集
+
+#### 第二步：模拟触发判断（20 min）
+
+对每条 query 执行以下思维模拟：
+
+```markdown
+## Query 评估记录 — #{id}
+
+**Query**: "{prompt}"
+**类型**: should-trigger / should-not-trigger
+**维度**: {dimension}
+
+### 模拟过程
+1. 我是一个 Agent，看到用户的这句话
+2. 我扫描所有已加载技能的 description 字段
+3. 我将用户意图与每个 description 匹配...
+4. 我的判断: 触发 / 不触发 {skill-name}
+5. 判断依据: description 中的关键词 "{...}" 与 用户说的 "{...}" 匹配/不匹配
+
+### 结果
+- 预期: {expected}
+- 实际判断: {actual}
+- 一致性: ✅ 通过 / ❌ 失败
+```
+
+#### 第三步：计算指标（5 min）
+
+```
+Trigger Rate (正例) = should_trigger 中被触发的数量 / should_trigger 总数
+                      目标值: > 0.8 (80%)
+
+False Positive Rate (负例) = should_not_trigger 中被误触发的数量 / should_not_trigger 总数
+                            目标值: < 0.2 (20%)
+
+综合得分 = Trigger Rate × 0.6 + (1 - False Positive Rate) × 0.4
+         目标值: > 0.85
+```
+
+#### 第四步：分析与迭代（可选）
+
+如果综合得分 < 0.85，按以下策略调整 description：
+
+| 问题表现 | 诊断 | 调整方向 |
+|---------|------|---------|
+| Trigger Rate 低 (< 0.7) | description 太窄或缺少关键触发词 | 补充同义词、增加触发场景列表 |
+| False Positive Rate 高 (> 0.3) | description 太宽或触发词太通用 | 收窄范围、增加排除条件、使用更具体的动词组合 |
+| 特定维度全失败 | 该维度的表达习惯未覆盖 | 针对该维度补充对应措辞 |
+| 训练集通过但验证集失败 | 过拟合到训练 query | 泛化调整，避免写入训练 query 的原文 |
+
+### Description 迭代优化循环
+
+```
+┌──────────────────────────────────────────────────┐
+│           CSO 迭代优化循环（最多 5 轮）            │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│  ① 编写初始 description（遵循 R9 规则）            │
+│       ↓                                          │
+│  ② 设计 20 条 Eval Query（10 正 + 10 负）          │
+│       ↓                                          │
+│  ③ 分割为训练集(60%) + 验证集(40%)                │
+│       ↓                                          │
+│  ④ 在训练集上手动评估触发率                        │
+│       ↓                                          │
+│  ⑤ 识别失败案例                                   │
+│    - 未触发 → description 太窄                    │
+│    - 误触发 → description 太宽                    │
+│       ↓                                          │
+│  ⑥ 修订 description（泛化而非添加特定关键词）      │
+│       ↓                                          │
+│  ⑦ 检查 ≤1024 字符限制                            │
+│       ↓                                          │
+│  ⑧ 在验证集上评估（防过拟合）                       │
+│       ↓                                          │
+│  ⑨ 记录验证集得分最高的版本                        │
+│       ↓                                          │
+│  ⑩ 全部通过 或 无显著提升？→ ✅ 完成              │
+│       否                                         │
+│    → 回到 ④（最多 5 轮）                          │
+│                                                  │
+└──────────────────────────────────────────────────┘
+```
+
+### 快速自检清单
+
+完成 CSO Eval 后，确认以下项目：
+
+- [ ] 正例 ≥ 8 条，覆盖 4 个维度（措辞/明确度/细节/复杂度）
+- [ ] 负例 ≥ 8 条，其中近误类 ≥ 4 条
+- [ ] 训练集/验证集分割比例约 60/40
+- [ ] Trigger Rate > 0.8
+- [ ] False Positive Rate < 0.2
+- [ ] description 长度仍 ≤ 1024 字符
+- [ ] 迭代轮次 ≤ 5 轮
+- [ ] 最终版本是验证集最优（非最后版本）
+
+### 与 TDD 的协作关系
+
+```
+技能创建完整验证链:
+
+  ┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+  │  TDD RED    │ ──→ │  TDD GREEN   │ ──→ │ CSO Eval    │
+  │  (内容需求)  │     │  (内容实现)   │     │  (触发验证)  │
+  └─────────────┘     └──────────────┘     └──────┬──────┘
+                                                   │
+                                              发现触发问题?
+                                                   │ ↓
+                                            ┌─────────────┐
+                                            │  REFACTOR   │
+                                            │ (修description)│
+                                            └─────────────┘
+```
+
+**执行顺序建议**: 先完成 TDD RED → GREEN 确保内容正确，再做 CSO Eval 确保触发准确。两者都通过后进入 REFACTOR 循环联合优化。
+
+---
+
+> 📖 **写作规则**: [../writing-rules.md](../writing-rules.md) — R8(TDD) + R9(CSO) + R10(反合理化)
 > 📋 **设计原则**: [../design-principles.md](../design-principles.md) — 四维分类 + Token 效率
+> 🔍 **官方参考**: [agentskills.io/skill-creation/optimizing-descriptions](https://agentskills.io/skill-creation/optimizing-descriptions)
