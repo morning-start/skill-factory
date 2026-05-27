@@ -1,418 +1,446 @@
 ---
 name: skill-factory-creator
-version: v0.6.0
+version: v2.0.0
 author: skill-factory
-description: Use when creating new skills, editing existing skills, or optimizing skill quality — covers TDD-driven creation workflow (RED-GREEN-REFACTOR), four-dimensional type classification, processing strategies, and standards compliance validation
-tags: [skill-factory, creator, skill-creation, tdd-driven, production, processing, layer-1, type-classification]
+description: Use when creating new AI Agent skills from scratch, writing SKILL.md files, or starting skill development with TDD. Triggers on "create a skill", "new skill", "write SKILL.md", "from zero", "build a skill", "skill creation", "TDD for skills", or "start a new agent skill". Handles type classification, template selection, TDD RED/GREEN/REFACTOR flow, and quick path for simple skills
+tags: [skill-creation, tdd-driven, skill-factory, type-classification, template-selection]
 dependency:
   parent: skill-factory
-  layer: 1
-  phase: creation
+  structure: "Type 3 (轻+厚): SKILL.md + references/"
+  pattern: "Creator Coordinator"
+meta:
+  complexity: intermediate
+  standalone: true
+  can_invoke_directly: true
 ---
-# 技能创建器
+# 📦 Skill Factory Creator — 技能创建器 v2.0
 
-> **任务目标**: 帮助用户从零创建符合规范的新技能，或对已有技能进行优化加工。
-
-覆盖技能全生命周期中的 **生产** 和 **加工** 两个阶段。
-
----
-
-## 触发条件
-
-| 用户说 | 场景 |
-|--------|------|
-| "帮我创建一个XX技能" | 新建技能 |
-| "优化一下这个技能" | 加工已有技能 |
-| "这个技能太大了，精简一下" | 精简处理 |
-| "丰富一下技能内容" | 丰富处理 |
+> **定位**: 从零创建新技能的完整工作流协调器
+> **架构**: 自含型子技能（可独立通过 `/creator` 触发）
+> **核心方法**: TDD 驱动 + 四维分类 + 渐进式构建
 
 ---
 
-## 一、TDD 驱动创建流程（v6.0 核心）
+## 🎯 职责范围
 
-> **铁律**: `NO SKILL WITHOUT A FAILING TEST FIRST`
->
-> 在编写任何技能内容之前，必须先观察 Agent 在没有技能时的失败行为。
+| ✅ 负责 | ❌ 不负责 |
+|---------|----------|
+| 从零创建新技能 | 优化已有技能 → `/processor` |
+| 类型判定与模板选择 | 审计技能合规性 → `/processor` |
+| TDD RED→GREEN→REFACTOR | 发布/版本管理 → `/publisher` |
+| Type 1 快速路径 | 合并/拆分技能 → `/assembler` |
 
-### 完整流程
+---
+
+## 🔄 创建流程总览
 
 ```
-🔴 RED（观察失败）→ 🟢 GREEN（编写技能）→ 🔵 REFACTOR（修补漏洞）
-         ↓                    ↓                      ↓
-   压力场景测试          最小可行技能           反合理化设计
-   记录违规行为          验证Agent合规          重测试至通过
-         ↓                    ↓                      ↓
-    ┌─────────────────────────────────────────────────┐
-    │           原有生产流水线（研究→分析→规划→生成→打包）     │
-    └─────────────────────────────────────────────────┘
-                              ↓
-                       发布 + 版本管理
+┌─────────────────────────────────────────────────────────────┐
+│                    技能创建流水线                              │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ① 需求分析 → ② 类型判定 → ③ TDD RED  → ④ 构建 SKILL.md   │
+│     (5min)      (5min)        (15min)       (20min)          │
+│                                                             │
+│  ⑤ 验证 → ⑥ REFACTOR → ✅ 完成                               │
+│   (10min)    (15min)                                         │
+│                                                             │
+│  Type 1 快捷: ①→②→④→⑤ (跳过 TDD, ~30min)                   │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Phase 0: 🔴 RED — 观察失败（必须第一步）
+---
 
-**目标**: 证明"没有这个技能时 Agent 会失败"。
+## 第一步：需求分析（5 min）
 
-#### 0.1 设计压力场景
+### 1.1 收集关键信息
 
-创建 3+ 个模拟真实高压力的使用场景：
-
-| 压力类型 | 示例 | 触发心理 |
-|---------|------|---------|
-| **时间压力** | "生产环境宕机，每分钟损失 $15k" | 走捷径诱惑 |
-| **权威压力** | "经理说：现在就修复" | 服从权威跳过流程 |
-| **疲劳/厌倦** | "这是第 10 个类似的技能了" | 省略步骤 |
-| **过度自信** | "这很明显不需要测试" | 跳过验证 |
-
-#### 0.2 运行基线测试（无技能）
-
-使用子代理执行压力场景，**逐字记录**：
+在开始之前，必须明确以下信息：
 
 ```markdown
-## 基线测试记录模板
+## 需求收集清单
 
-**日期**: YYYY-MM-DD
-**测试场景**: [场景名称]
-**子代理 ID**: [ID]
-
-**观察到的行为**:
-- Agent 做了什么？（具体动作）
-- 违反了哪些规则？
-- 给出了什么合理化借口？（逐字记录）
-
-**违规模式识别**:
-- 模式1: [描述]
-- 模式2: [描述]
+- [ ] **技能名称**: kebab-case 命名（如 `git-commit-helper`）
+- [ ] **核心功能**: 用一句话描述这个技能做什么
+- [ ] **目标用户**: 谁会使用这个技能？（开发者/非技术用户/特定角色）
+- [ ] **触发场景**: 用户在什么情况下会需要这个技能？
+- [ ] **复杂度预判**: 单功能 vs 多模块？简单 vs 复杂？
+- [ ] **依赖项**: 是否需要调用其他技能/工具/API？
 ```
 
-#### 0.3 识别模式
+### 1.2 输出：需求简报
 
-总结 Agent 的常见失败策略：
-- 它倾向于跳过哪些步骤？
-- 它常用什么借口？
-- 在什么压力下最容易违反规则？
+格式化输出为结构化需求：
 
-> 📖 **详细方法论**: [../../references/writing-rules.md](../../references/writing-rules.md) — R8: TDD 驱动技能创建
+```yaml
+skill_name: {name}
+one_liner: "{一句话描述}"
+target_user: {目标用户}
+trigger_scenes:
+  - "{场景1}"
+  - "{场景2}"
+estimated_complexity: {low/medium/high}
+dependencies: [{依赖列表}]
+```
+
+> 💡 **提示**: 如果用户无法清晰描述需求，使用 AskUserQuestion 工具澄清。
 
 ---
 
-### 传统生产流水线（在 RED 之后执行）
+## 第二步：类型判定（5 min）
 
-完成 RED 阶段后，按以下流水线生成技能初稿：
+### 2.1 四维分类法
 
-### 入口分流
+根据 [design-principles.md](../references/design-principles.md) 的四维分类法判定类型：
 
-根据任务类型选择不同的进入点：
+```
+┌─────────────────────────────────────────┐
+│           四维分类决策树                  │
+├─────────────────────────────────────────┤
+│                                         │
+│  Q1: 功能数量？                          │
+│  ├── 单一功能 → 轻                       │
+│  └── 多模块/多步骤 → 重                  │
+│                                         │
+│  Q2: 内容体量？                          │
+│  ├── <300行 → 薄                        │
+│  └── >300行 → 厚                        │
+│                                         │
+│  → 组合得出 Type 1-4                    │
+│                                         │
+└─────────────────────────────────────────┘
+```
 
-| 任务类型 | 进入点 | 说明 |
-|---------|--------|------|
-| **新建技能** | Step 1 | 完整走研究→分析→规划→生成→打包 |
-| **优化已有技能** | Step 2 | 跳过研究（需求已知），从分析体量开始 |
-| **仅检查规范** | Step 5 | 直接进入打包/验证阶段 |
+### 2.2 类型判定表
 
-> 💡 大多数"优化"请求实际上应该走完整流程——因为原技能可能在多个维度上都有问题，只修一处容易遗漏。
+| 判定维度 | Type 1 | Type 2 | Type 3 | Type 4 |
+|---------|--------|--------|--------|--------|
+| **功能数** | 1 | 2-4 | 1-2 | 4+ |
+| **预估行数** | <300 | <300 | 300-500 | 500+ |
+| **子技能** | 无 | skills/ | 无 | skills/ + references/ |
+| **references/** | 可选 | 可选 | 必须 | 必须 |
+| **scripts/** | 无 | 可选 | 可选 | 必须 |
+| **TDD 要求** | 可简化 | 标准 | 标准 | 完整 |
 
-### Step 1: 研究 (research)
+### 2.3 判定结果 → 决策
 
-收集足够的信息，理解用户需求。
+```
+判定为 Type N → 选择对应模板（见 references/type-templates.md）
+               → 决定是否走完整 TDD 流程
+```
 
-**关键问题**：
-- 技能的目标是什么？（一句话说清）
-- 谁来使用？（AI Agent / 人类）
-- 需要什么输入？产出什么输出？
-- 有没有类似的技能可以参考？
+**快速路径判断**：
+- **Type 1 + 简单场景** → 启用快速路径（跳过完整 TDD，~30min 完成）
+- **Type 2-4 或 关键任务** → 必须走完整 TDD 流程
 
-**输出**：需求摘要（3-5 条要点）。
+---
 
-### Step 2: 分析 (analyzer)
+## 第三步：TDD RED 阶段（15 min）*
 
-判断技能的"体型"——轻还是重？薄还是厚？
+> *Type 1 快速路径可跳过此步骤，但建议至少做简化版压力测试
 
-| 维度 | 判断标准 |
-|------|---------|
-| **轻** | 1 个核心能力 |
-| **重** | 多个独立模块 |
-| **薄** | 内容预计 <300 行 |
-| **厚** | 内容预计 >300 行，需要 references/ |
+### 3.1 设计压力场景
 
-**门禁**：信息完整度 ≥80% 才能进入下一步。不足则回调研究阶段补充（最多 1 次）。
+根据 [writing-rules.md#R8](../references/writing-rules.md) 的 TDD 方法论：
 
-**输出**：类型判定结果（Type 1-4）。
+```markdown
+## 压力场景设计原则
 
-### Step 3: 规划 (planner)
+1. **真实性**: 模拟真实的高压力情况
+   - 时间紧迫（"5分钟内完成"）
+   - 权威压力（"老板要求这样做"）
+   - 疲劳状态（"这是第10个类似任务"）
 
-根据类型制定创建计划。
+2. **多样性**: 至少 3 个不同类型的压力组合
+   - 场景 A: 时间紧 + 需求模糊
+   - 场景 B: 权威压力 + 技术冲突
+   - 场景 C: 疲劳 + 边缘情况
 
-| 类型 | 策略 | 预计耗时 |
-|------|------|---------|
-| Type 1 | 🚀 快速路径 | 30min |
-| Type 2 | 📋 标准路径 | 2h |
-| Type 3 | 📋 标准路径 | 3h |
-| Type 4 | 🔄 完整路径 | 5h+ |
+3. **具体性**: 每个场景必须有明确的输入和期望输出
+```
 
-**层级预检**：在此阶段检查目录深度，确保 ≤3 层。
+### 3.2 运行基线测试（无技能状态）
 
-**输出**：创建计划（步骤 + 预估耗时 + 路径选择）。
+**操作步骤**：
 
-### Step 4: 生成 (generator)
+1. 创建一个干净的测试环境（不加载任何技能）
+2. 用子代理执行压力场景
+3. **逐字记录** Agent 的行为和借口
+4. 记录违反的规则和合理化理由
 
-按计划生成技能内容。
+### 3.3 记录失败模式
 
-**核心内容**：
-1. **前言区**（YAML frontmatter）：name / version / description / tags / dependency
-2. **必备章节**：任务目标 → 触发条件 → 操作步骤 → 示例 → 注意事项
-3. **级联目录**：references/ 或 skills/（按类型）
+```markdown
+## 基线测试记录
 
-**层级合规验证**：确保输出目录深度 ≤3 层。
+| 场景 | 期望行为 | 实际行为 | 违规类型 | 合理化借口 |
+|------|---------|---------|---------|-----------|
+| 场景A | ... | ... | ... | "..." |
+| 场景B | ... | ... | ... | "..." |
+| 场景C | ... | ... | ... | "..." |
 
-**输出**：完整的 SKILL.md 初稿。
+## 核心问题总结
+1. ...
+2. ...
+3. ...
+```
 
-### Step 5: 打包 (package)
+> 📖 **详细 TDD 指南**: [references/tdd-guide.md](references/tdd-guide.md)
 
-验证生成结果是否符合规范。
+---
 
-**检查清单**：
+## 第四步：构建 SKILL.md（20 min）
 
-| # | 检查项 | 标准 |
-|---|--------|------|
-| 1 | 前言区完整 | name/version/description/tags/dependency |
-| 2 | description 长度 | 100-150 字符 |
-| 3 | 命名规范 | kebab-case |
-| 4 | 必备章节 | 5 个必有章节 |
-| 5 | 层级合规 | 目录深度 ≤3 层 |
-| 6 | 链接有效 | 内部引用无死链 |
+### 4.1 选择模板
 
-**评分体系**：
+根据类型判定结果，从 [references/type-templates.md](references/type-templates.md) 选择对应模板：
 
-| 评分 | 结果 |
-|------|------|
-| ≥70 | ✅ 合格，可进入发布 |
-| 60-69 | ⚠️ 可发布但建议优化，回调 generator（最多 2 轮） |
-| <60 | ❌ 不合格，必须修复 |
+| 类型 | 模板文件 | 特征 |
+|------|---------|------|
+| Type 1 | `type1-template.md` | 单文件，<150 行 |
+| Type 2 | `type2-template.md` | +skills/ 结构 |
+| Type 3 | `type3-template.md` | +references/ 结构 |
+| Type 4 | `type4-template.md` | 完整工厂结构 |
 
-### Phase 1: 🟢 GREEN — 验证技能效果
+### 4.2 Front Matter 必填字段
 
-**目标**: 证明"有这个技能时 Agent 会遵守规则"。
+```yaml
+---
+name: {skill-name}                    # kebab-case
+version: "0.1.0"                      # 初始版本
+author: {author-name}
+description: >
+  Use when {触发条件1}, {触发条件2}, or {触发条件3}.
+  {可选: 简短功能描述}. Max 1024 chars.
+tags: [{tag1}, {tag2}]
+dependency:
+  parent: {parent-skill-name}         # 无父技能写 "none"
+  structure: "Type N ({轻/重}+{薄/厚})"
+meta:
+  complexity: {basic/intermediate/advanced}
+---
+```
 
-#### 1.1 用技能重新测试
+### 4.3 CSO Description 编写规则
 
-使用在 RED 阶段创建的相同压力场景，但这次**加载你编写的技能**：
+遵循 [writing-rules.md#R9](../references/writing-rules.md)：
+
+```
+✅ 正确格式:
+  "Use when creating, editing, or optimizing git commits.
+   Handles conventional commit messages, intelligent staging,
+   and commit message generation. Triggers on 'git commit',
+   'commit message', or 'conventional commits'."
+
+❌ 错误格式:
+  "Git Commit Helper - helps you write better commit messages
+   following the Conventional Commits specification..."
+   （这是功能描述，不是触发条件）
+```
+
+**CSO 检查清单**：
+- [ ] 以 "Use when..." 开头（或包含此短语）
+- [ ] 只写触发条件，不总结工作流
+- [ ] 包含用户可能搜索的关键词
+- [ ] 长度在 50-1024 字符之间
+- [ ] 无 XML 角括号 `< >`
+
+### 4.4 正文结构（按类型调整）
+
+#### Type 1 最小结构（<150 行）
+
+```markdown
+# {Skill Name}
+
+> 一句话定位
+
+## 目标
+## 操作步骤
+## 示例
+## 注意事项 / Gotchas
+```
+
+#### Type 2-4 完整结构
+
+```markdown
+# {Skill Name}
+
+> 定位 + 架构说明
+
+## 目标与范围
+## 核心流程
+## 详细步骤（按 Happy Path First 排序）
+## 错误处理（独立章节，见 R4）
+## 示例（最小化，见 R3）
+## 验证清单（二进制通过/不通过，见 R5）
+## 引用路径（L3 懒加载指引）
+```
+
+### 4.5 写作规则速查
+
+在编写过程中，始终遵循以下核心规则（来自 [writing-rules.md](../references/writing-rules.md)）：
+
+| 规则 | 应用时机 | 一句话 |
+|------|---------|--------|
+| **R1 Gotchas** | 写注意事项时 | 具体陷阱 > 泛泛提醒 |
+| **R2 反模式** | 写禁止规则时 | 每个"不要"配"这样做"+原因 |
+| **R3 Happy Path** | 排序章节时 | 90% 场景放前面 |
+| **R4 验证循环** | 写检查步骤时 | 二进制通过/不通过 |
+| **R7 默认值** | 给选项时 | 默认值 + 替代方案 |
+| **R11 脆弱度匹配** | 控制细节程度 | 高脆弱=精确指令；低脆弱=灵活指导 |
+
+---
+
+## 第五步：验证（10 min）
+
+### 5.1 自检清单
+
+```markdown
+## 创建后验证
+
+### 结构检查
+- [ ] Front Matter 完整（name/version/description/tags）
+- [ ] description 符合 CSO 规则（50-1024字符，含 Use when）
+- [ ] 目录深度 ≤ 3 层
+- [ ] 命名规范（kebab-case）
+
+### 内容检查
+- [ ] 有明确的操作步骤（不是泛泛而谈）
+- [ ] 有错误处理章节（见 R4）
+- [ ] 有验证清单（二进制判断）
+- [ ] Happy Path First 排序
+
+### 质量检查
+- [ ] 行数符合类型预期（Type 1<300, Type 2<300, etc.）
+- [ ] 无死链（所有引用路径有效）
+- [ ] 表格/列表优先于长段落
+```
+
+### 5.2 自动化审计（可选）
+
+如果项目中有审计脚本，运行：
 
 ```bash
-# 伪代码示例
-run_subagent(
-  scenario: pressure_test_1,
-  skills: [your_new_skill],
-  expected_behavior: compliance_with_rules
-)
+# 使用 processor 子技能的审计脚本
+/skill-factory-processor/scripts/audit.ps1 -Path ./new-skill/SKILL.md
 ```
 
-#### 1.2 检查合规性
-
-| 检查项 | 通过标准 |
-|--------|---------|
-| Agent 遵守了核心规则？ | ✅ 是 |
-| 没有使用 RED 阶段的借口？ | ✅ 是 |
-| 在压力下仍能正确执行？ | ✅ 是 |
-
-#### 1.3 如果不通过
-
-回到 Step 4（生成），修改技能内容：
-- 只针对失败的测试用例修改
-- 不要过度设计
-- 保持最小化原则
-
-> 📖 **反合理化设计**: [../../references/writing-rules.md](../../references/writing-rules.md) — R10: 反合理化设计模式
+或手动对照 [skill-standards.md](../references/skill-standards.md) 的 100 分评分体系。
 
 ---
 
-### Phase 2: 🔵 REFACTOR — 修补漏洞
+## 第六步：REFACTOR 阶段（15 min）*
 
-**目标**: 发现并修补 Agent 找到的新漏洞。
+> *仅完整 TDD 流程需要
 
-#### 2.1 寻找新合理化方式
+### 6.1 重新测试
 
-Agent 可能会找到新的绕过方式。常见的新漏洞：
+用新创建的技能再次运行第三步的压力场景。
+
+### 6.2 发现并修补漏洞
 
 ```markdown
-## 新发现的合理化方式
+## 漏洞修补循环
 
-- "这次情况特殊..." → 添加："无例外，特殊情况也要走流程"
-- "我是按精神不是按字面..." → 添加："违反字面 = 违反精神"
-- "时间不够完整流程..." → 添加："时间紧 = 更要遵循流程（避免返工）"
+1. 运行压力场景 → 观察行为
+2. 发现新的合理化方式 → 记录到对照表
+3. 在 SKILL.md 中添加禁止规则
+4. 再次测试 → 直到通过
 ```
 
-#### 2.2 更新技能
+### 6.3 合理化对照表更新
 
-为每个新漏洞添加明确的禁止规则。
+将新发现的借口添加到技能的红旗警告列表：
 
-#### 2.3 重验证
+```markdown
+## 🚩 Red Flags - STOP and Start Over
 
-再次运行所有压力场景，直到全部通过。
+如果你发现自己想说以下任何一句话，停下来，重新开始：
+- [ ] "{新发现的借口1}"
+- [ ] "{新发现的借口2}"
 
-#### 2.4 合理化对照表
-
-最终输出一个完整的合理化对照表（见 writing-rules.md R10）。
+**如果你勾选了任何一项：删掉代码，从头开始用 TDD。**
+```
 
 ---
 
-## 二、加工策略
+## 🚀 Type 1 快速路径
 
-已创建的技能需要优化时，按体量自动选择策略。
+当满足以下所有条件时，可启用快速路径：
 
-### 策略选择
+### 启用条件
 
-| 行数 | 策略 | 加工流程 |
-|------|------|---------|
-| >500 | 精简优先 | 精简冗余 → 丰富内容 → 美化格式 → 规范检查 |
-| <200 | 丰富优先 | 丰富内容 → 美化格式 → 规范检查 |
-| 200-500 | 均衡 | 精简冗余 → 丰富内容 → 美化格式 → 规范检查 |
+- [ ] 判定为 **Type 1**（单一功能，<300 行）
+- [ ] **非关键任务**（非安全相关、非金融相关、非生产环境关键路径）
+- [ ] 用户确认可以接受简化流程
 
-### 加工操作
+### 快速路径流程（~30 min）
 
-| 操作 | 用途 | 何时用 | 关键技巧 |
-|------|------|--------|---------|
-| **精简冗余** | 删除重复、合并相似章节 | 行数 >500、重复章节、过多 Mermaid | 删除优先级：重复内容>冗余描述>过时信息；Mermaid 图每技能≤3 个，超过则移至 references/；相邻相似段落合并为一个表格 |
-| **丰富内容** | 补充示例和细节 | 缺少示例、步骤不够细、操作清单不完整 | 示例三要素：输入（给什么）+ 输出（产出什么）+ 边界条件（什么情况不适用）；步骤粒度：每个步骤应可独立执行并产生可见输出 |
-| **美化格式** | 表格对齐、标题层级优化 | 格式混乱、标题层级不清 | 表格列宽均匀对齐；标题层级不超过 4 级（# → ####）；代码块必须标注语言（```python 而非 ```） |
-| **规范检查** | 对照 skill-standards.md 全面验证 | 发布前最终验证 | 自检顺序建议：前言区(25%)→必备章节(25%)→链接有效性(25%)→层级合规(25%)；常见错误速查：description<100字符、缺注意事项、命名非kebab-case |
+```
+① 需求分析(5min)
+     ↓
+② 类型判定(5min) → 确认 Type 1
+     ↓
+③ 选择 Type 1 模板(2min)
+     ↓
+④ 填充内容(15min)
+     ↓
+⑤ 简化验证(3min)
+     ↓
+✅ 完成！
+```
 
-### 循环保护
+### 快速路径 vs 完整流程对比
 
-- 同一技能最多加工 **3 轮**
-- 行数变化 <5% 触发警告，提示可能已过度优化
-- Type 1 技能默认**跳过加工阶段**（快速路径）
+| 维度 | 快速路径 | 完整 TDD |
+|------|---------|---------|
+| **耗时** | ~30 min | ~60-70 min |
+| **TDD RED** | 跳过（或简化为 1 个场景） | 完整 3+ 场景 |
+| **REFACTOR** | 跳过 | 完整漏洞修补 |
+| **适用** | Type 1 非关键任务 | 所有类型 + 关键任务 |
+| **质量保证** | 基础验证 | 高置信度 |
 
-### 转交协议：复杂技能拆分
+---
 
-当检测到以下**任一条件**时，creator 应停止执行并转交 assembler：
+## 📂 本子技能结构
 
-#### 触发条件（满足任一即转交）
+```
+skills/skill-factory-creator/
+├── SKILL.md                      ← 本文件（协调器 ~180行）
+└── references/
+    ├── tdd-guide.md              ← TDD 完整指南（RED/GREEN/REFACTOR）
+    └── type-templates.md         ← Type 1-4 模板库
+```
 
-| 条件 | 阈值 | 说明 |
+---
+
+## 🔗 相关资源
+
+| 资源 | 路径 | 用途 |
 |------|------|------|
-| **行数超标** | 当前技能 >800 行或预计 >500 行 | 单一 SKILL.md 无法有效维护 |
-| **多独立模块** | 识别到 ≥3 个独立功能域 | 应该拆分为独立子技能 |
-| **用户明确要求** | 用户说"拆开"、"分离"、"分成多个" | 显式拆分需求 |
-| **类型判定为 Type 4** | 重+厚且多模块 | 架构上需要 skills/ 目录 |
-
-#### 转交流程
-
-```
-Creator 检测到触发条件
-    ↓
-暂停当前加工流程
-    ↓
-生成转交报告:
-┌─────────────────────────────────────┐
-│ 📋 技能转交报告                      │
-├─────────────────────────────────────┤
-│ 来源: skill-factory-creator          │
-│ 目标: skill-factory-assembler        │
-│ 原因: [具体触发条件]                 │
-│ 当前状态: [已完成的工作]             │
-│ 建议操作: [拆分维度建议]             │
-└─────────────────────────────────────┘
-    ↓
-调用 assembler 继续处理
-    ↓
-[assembler 完成后可返回 creator 进行验证]
-```
-
-#### 转交后的协作模式
-
-```mermaid
-flowchart LR
-    A[Creator 加工] -->|触发条件| B[暂停+生成报告]
-    B --> C[Assembler 拆分]
-    C --> D[返回 Creator 验证]
-    D --> E[Publisher 发布]
-    
-    style A fill:#4CAF50,color:#fff
-    style C fill:#FF9800,color:#fff
-    style E fill:#2196F3,color:#fff
-```
-
-> 💡 **设计原则**: Creator 专注"创建和加工"，Assembler 独占"合并和拆分"。通过标准化转交协议实现无缝协作。
->
-> 📖 **详见**: [../skill-factory-assembler/SKILL.md](../skill-factory-assembler/SKILL.md) — 完整的合并/拆分方法论
-
----
-
-## 快速参考
-
-| 场景 | 操作 |
-|------|------|
-| 新建 Type 1 技能 | Step 1→2→3→4→5（跳过加工） |
-| 新建 Type 2-4 技能 | Step 1→2→3→4→5 → 加工策略 |
-| 优化已有技能 | 直接进入加工策略 |
-| 拆分大技能 | 加工策略 → 拆分模式 |
-
----
-
-## 写作规则速查
-
-> 完整规则详见 [../../references/writing-rules.md](../../references/writing-rules.md)
-
-生成 SKILL.md 初稿后，按以下规则优化内容质量：
-
-### 排序原则：Happy Path First
-
-| 原则 | 说明 |
-|------|------|
-| 90% 场景的方案放最前面 | Agent 可能不读完全文，重要路径必须在顶部 |
-| Quickstart 覆盖端到端 | 包括中间可能遇到的意外（如支付需先充值） |
-| 边缘情况后置 | 放在折叠区域或文档末尾 |
-
-### 规则写法：配对公式
-
-每条规则必须回答"为什么"：
-
-| 格式 | 示例 |
-|------|------|
-| 规则 + 理由 | "平台费 10%（最低 $0.005），所以 $0.01 的调用实际收 $0.005" |
-| 规则 + 后果 | "禁止回滚部署，因为 auto-unpublish 不可逆，所以发布前必须充分测试" |
-| 规则 + 示例 | "使用 viem 而非 ethers.js，因为后者不支持 fee-token 扩展" |
-
-### 反模式格式
-
-不用 ❌ 单独禁令，用 **三段式**：
-
-```
-❌ 不要用 ethers.js 直接交互链
-   → 因为它不支持此链的 fee-token 和 TIP-20 扩展，会导致支付失败
-   → ✅ 统一使用 viem 进行任何直接链上交互
-```
-
-### 验证清单编写规范
-
-操作步骤后的验证必须满足：
-
-| 坏（不可验证） | 好（二进制验证） |
-|---------------|----------------|
-| "代码整洁" | "`eslint --max-warnings 0` exit code = 0" |
-| "检查无误" | "`git diff --stat` 显示 0 行变更" |
-| "格式正确" | "`prettier --check` 通过" |
-| "测试通过" | "`npm test` 全部 green，覆盖率 ≥80%" |
-
-### 复杂度自检
-
-| 你的技能 | 应属级别 | 特征 |
-|---------|---------|------|
-| <5 步，单一路径 | basic | 无需边缘情况处理 |
-| 5-10 步，有分支 | intermediate | 主要路径 + 1-2 个 fallback |
-| >10 步，多决策点 | advanced | 需要 Plan→Validate 循环 |
+| 全局写作规则 | [../references/writing-rules.md](../references/writing-rules.md) | R1-R14 完整规则 |
+| 设计原则 | [../references/design-principles.md](../references/design-principles.md) | 三层铁律 + 四维分类 |
+| 技能标准 | [../references/skill-standards.md](../references/skill-standards.md) | 100 分评分体系 |
+| 最佳实践导航 | [../references/best-practices.md](../references/best-practices.md) | 项目知识枢纽 |
+| TDD 详细指南 | [references/tdd-guide.md](references/tdd-guide.md) | TDD 各阶段详细操作 |
+| 类型模板库 | [references/type-templates.md](references/type-templates.md) | Type 1-4 模板代码 |
 
 ---
 
 ## ⚠️ 注意事项
 
-- **信息完整度优先**：分析阶段信息不足绝不跳过，强行生成会导致返工
-- **Type 1 禁止加工**：简单技能再加工只会画蛇添足，快速路径是最佳实践
-- **循环保护是硬限制**：3 轮加工后仍不满意，问题可能在需求层面而非技能本身
-- **拆分边界清晰**：拆分时确保每个子技能可独立运行，不要拆出高度耦合的半成品
+1. **TDD 是铁律，不是选项**: 除非明确启用 Type 1 快速路径，否则必须走完整 TDD
+2. **先判定类型再选模板**: 错误的类型选择会导致后续大量返工
+3. **CSO description 决定生死**: 写得不好，技能永远不会被自动激活
+4. **保持 SKILL.md 精简**: 详细内容放 references/，SKILL.md 只放核心流程
+5. **每个技能都应独立可用**: 即使是子技能也要有自己的 description 和完整逻辑
 
 ---
 
-> 📖 设计原理: [../../references/design-principles.md](../../references/design-principles.md)  
-> 📋 规范清单: [../../references/skill-standards.md](../../references/skill-standards.md)
+## 版本历史
+
+| 版本 | 日期 | 变更 |
+|------|------|------|
+| **v2.0.0** | 2026-05-27 | **v2.0 架构重构**: 从 orchestrator 模式重构为自含型 coordinator；整合 TDD 流程、类型判定、模板选择；新增 Type 1 快速路径；引用全局 references + 自含 references；可独立通过 `/creator` 触发 |
+| v1.0.0 | 2026-05-27 | 初始版本（orchestrator + workers 模式，已废弃） |

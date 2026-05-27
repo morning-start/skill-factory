@@ -187,28 +187,52 @@ type_4:
 
 ---
 
-## 6. Skills 加载机制（Progressive Disclosure）
+## 6. 三级渐进加载系统 (Progressive Disclosure)
 
-Skills 采用三阶段渐进式加载。理解这个机制对写好技能至关重要：
+> **来源**: [agentskills.io 官方规范](https://agentskills.io/specification) + SKILL.md Pattern 实战验证
+> **核心**: 技能内容按需加载，理解此机制 = 理解"为什么技能不触发"和"为什么上下文爆了"
 
-| 阶段 | Agent 看到的内容 | 触发条件 |
-|------|-----------------|---------|
-| **Discovery（发现）** | 仅读取 name + description | Agent 启动时 |
-| **Activation（激活）** | 完整 SKILL.md 内容读入上下文 | 用户任务匹配某技能的 description |
-| **Execution（执行）** | 按需加载 scripts/ references/ assets/ | 技能被触发后 |
+### 三级架构 (L1 / L2 / L3)
 
-### 对写技能意味着什么
+| 层级 | 名称 | 加载时机 | Token 预算 | 内容 | 作用 |
+|------|------|---------|-----------|------|------|
+| **L1** | Metadata | 启动时（始终） | ~100/skill | name + description | Agent 决定是否激活 |
+| **L2** | Instructions | 触发匹配时 | <5,000 | SKILL.md 全文 | Agent 知道怎么做 |
+| **L3** | Resources | 按需引用时 | 不限 | references/ + scripts/ + assets/ | 提供深度知识/执行操作 |
 
 ```mermaid
 flowchart LR
-    D["🔍 Discovery<br/>只看 description"] -->|"匹配成功"| A["📖 Activation<br/>加载 SKILL.md"]
-    A -->|"触发执行"| E["⚡ Execution<br/>调用 scripts/references"]
+    L1["📋 L1: Metadata<br/>~100 tokens<br/>始终加载"] -->|"description 匹配"| L2["📖 L2: Instructions<br/><5k tokens<br/>触发后加载"]
+    L2 -->|"引用路径"| L3["⚡ L3: Resources<br/>按需懒加载<br/>零 idle 开销"]
 ```
 
+### 对写技能意味着什么
+
 - **description 是唯一触发信号** — 写得不好，技能永远不会被自动激活
-- **SKILL.md 主体长度放心写** — 平时不占 context window，只在激活后加载
-- **重资源放 references/ scripts/ assets/** — 仅在执行阶段按需加载，不污染上下文
-- **一个仓库可装 50+ Skills** — Discovery 阶段只占少量上下文（仅 name + description）
+- **SKILL.md 建议 <500 行, <5k tokens** — 这是 L2 的预算上限
+- **重资源放 references/ scripts/ assets/** — 仅在 L3 按需加载，不污染上下文
+- **一个仓库可装 50+ Skills** — L1 阶段只占 ~100 tokens/skill，开销极小
+- **idle 时零 token 开销** — 未触发的技能不占任何上下文
+
+### 关键设计原则 (来自 agentskills.io best-practices)
+
+| 原则 | 一句话 | 反模式 |
+|------|--------|--------|
+| **加 Agent 缺少的，省略已知的** | 不解释 PDF、HTTP、数据库等通用概念 | 用 10 行解释通用概念 |
+| **设计内聚单元** | 一个技能 = 一个连贯工作单元 | 既做查询又做管理 |
+| **适度细节** | 过于全面反而有害 — Agent 难提取相关内容 | 覆盖所有边缘情况 |
+| **脆弱度匹配精度** | 操作精密→高指令性；操作灵活→高自由度 | 所有部分同样详细 |
+| **提供默认值而非菜单** | 选一个默认方案，简提替代方案 | 列出 5 个平等选项让 Agent 选择 |
+| **过程优于声明** | 教"怎么思考一类问题" | 写死具体答案 |
+
+### 引用格式规范
+
+告诉 Agent **何时**加载每个文件：
+
+```
+✅ 好: "如果 API 返回非 200 状态码，读取 references/api-errors.md"
+❌ 差: "详细文档见 references/"  (Agent 不知道什么时候该读)
+```
 
 ---
 
@@ -234,3 +258,9 @@ flowchart LR
 ✅ 每个章节都能回答"用户会怎么用到这个信息"
 ✅ 表格和列表优先于自然语言段落
 ```
+
+---
+
+> 📖 **统一速查**: [best-practices.md](./best-practices.md) — 全项目知识导航枢纽
+> 📋 **规范清单**: [skill-standards.md](./skill-standards.md) — 100分评分体系
+> ✍️ **写作规则**: [writing-rules.md](./writing-rules.md) — R1-R10 高级规则

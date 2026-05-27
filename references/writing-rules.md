@@ -497,5 +497,119 @@ description: Use when implementing any feature or bugfix, before writing impleme
 
 ---
 
+## R11: 脆弱度匹配精度（Fragility-Matched Specificity）
+
+> **来源**: [agentskills.io/best-practices](https://agentskills.io/skill-creation/best-practices)
+>
+> 不是所有指令都需要同样详细。匹配指令的精确度与操作的脆弱程度。
+
+### 规则
+
+| 操作类型 | 精确度 | 示例 |
+|---------|--------|------|
+| **高脆弱性操作** | 极其精确，禁止修改 | `Run exactly: python scripts/migrate.py --verify --backup. Do not modify or add flags.` |
+| **中等脆弱性** | 明确步骤 + 允许合理变通 | `1. 运行迁移 2. 验证结果 3. 如失败回滚` |
+| **低脆弱性 / 高自由度** | 解释目的而非步骤 | `检查代码安全性：关注 SQL 注入、XSS、认证绕过。具体顺序由你判断。` |
+
+### 反模式
+
+```
+❌ 所有部分同等详细 → Agent 在灵活场景也死板执行
+❌ 所有部分都模糊 → Agent 在精密操作也自由发挥
+✅ 混合使用 → 关键路径精确，探索性任务灵活
+```
+
+---
+
+## R12: 提供默认值而非菜单（Defaults Over Menus）
+
+> **来源**: [agentskills.io/best-practices](https://agentskills.io/skill-creation/best-practices)
+
+### 规则
+
+当多个工具/方法可行时：
+
+```
+❌ 坏: "你可以用 pypdf, pdfplumber, PyMuPDF, 或 pdf2image..."
+   → Agent 花时间选择，可能选错
+
+✅ 好: "使用 pdfplumber 提取文本（默认）。对于扫描件需 OCR 时改用 pdf2image+pytesseract。"
+   → 清晰默认 + 逃生通道
+```
+
+### 应用场景
+
+- 工具选择：主工具 + 替代方案
+- 框架选择：推荐框架 + 何时换其他
+- 输出格式：默认格式 + 可选替代
+
+---
+
+## R13: Plan-Validate-Execute（PVE）模式
+
+> **来源**: [agentskills.io/best-practices](https://agentskills.io/skill-creation/best-practices#plan-validate-execute)
+>
+> 对批量或破坏性操作，强制中间计划验证。
+
+### 结构
+
+```
+1. PLAN    → 创建结构化计划文件（如 field_values.json）
+2. VALIDATE → 对照源真值验证计划（运行 validate 脚本）
+3. EXECUTE  → 仅验证通过后执行实际操作
+
+如果验证失败:
+  → 审查错误信息 → 修正计划 → 重新验证 → 循环直到通过
+```
+
+### 与 R4（验证循环）的区别
+
+| | R4 验证循环 | R13 PVE |
+|---|---|---|
+| **适用场景** | 一般性工作质量保障 | 批量/破坏性操作 |
+| **验证对象** | 自检 / 对照参考文档 | 对照外部源真值 |
+| **计划产物** | 无（直接做→验） | 必须有显式计划文件 |
+| **典型用途** | 代码审查后自检 | 数据库迁移 / 批量表单填写 |
+
+---
+
+## R14: Memory Protocol（跨会话记忆）
+
+> **来源**: [claudeskills.info](https://claudeskills.info) — Agent Memory Patterns
+>
+> 让技能在多次会话间保持上下文连续性。
+
+### 三种模式
+
+| 模式 | 实现 | 适用场景 |
+|------|------|---------|
+| **In-session accumulation** | 会话内逐步积累上下文 | 单次长对话中的复杂任务 |
+| **Cross-session file memory** | AGENT_MEMORY.md 或 project-state.json | 跨天/跨周的长期项目 |
+| **Tool-mediated state** | 通过 API/Git 存储状态 | 多 Agent 协作场景 |
+
+### 推荐实现
+
+```markdown
+## Memory Protocol
+
+会话开始时:
+1. 读取 AGENT_MEMORY.md（如有）
+2. 读取 project-state.json（当前状态）
+3. 向用户汇报上次进度和待办事项
+
+会话结束时:
+1. 更新 AGENT_MEMORY.md（记录关键决策和教训）
+2. 更新 project-state.json（当前状态快照）
+3. 记录阻塞项和下一步行动
+```
+
+### 文件约定
+
+```
+{skill-name}/
+├── AGENT_MEMORY.md      ← 跨会话记忆（不提交到 git 或 .gitignore）
+└── project-state.json   ← 项目状态机（可提交）
+```
+
 > 📖 设计原理: [./design-principles.md](./design-principles.md)
 > 📋 规范清单: [./skill-standards.md](./skill-standards.md)

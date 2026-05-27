@@ -32,22 +32,24 @@ dependency:
 
 #### description 编写规则（CSO 优化）
 
-> **核心原则**: description 只写触发条件，不写工作流总结。防止 Agent 走捷径跳过正文。
+> **核心原则**: description 是 Agent 的**触发条件**（不是给人看的摘要）。防止 Agent 走捷径跳过正文。
+>
+> 📖 **官方规格**: [agentskills.io/specification](https://agentskills.io/specification) — max **1024 字符**
 
 | # | 规则 | 说明 | 好例子 | 坏例子 |
 |---|------|------|--------|--------|
-| 1 | **以 "Use when..." 开头** | 聚焦触发条件 | "Use when creating new skills..." | "技能创建指南和设计模式库" |
+| 1 | **包含 "Use when..." 触发短语** | 聚焦触发条件（可在开头或功能描述后） | "Use when creating new skills..." 或 "Generates X. Use when..." | "技能创建指南和设计模式库" |
 | 2 | **只写触发条件** | 不总结工作流或步骤 | "Use when tests have race conditions" | "用子代理执行任务并审查代码" |
-| 3 | **具体症状** | 用户实际遇到的问题 | "技能不如预期、Agent 绕过规则时" | "需要技能创建时使用" |
+| 3 | **具体触发短语** | 列出用户实际会说的表达 | "Triggers on 'write a README', 'create readme', or 'document this'" | 模糊的功能描述 |
 | 4 | **关键词覆盖** | Agent 可能搜索的词 | "skill / 技能 / SKILL.md / agent / TDD" | 单个术语 |
-| 5 | **第三人称** | 注入系统提示 | "Use when encountering any bug..." | "I can help you debug..." |
-| 6 | **长度控制** | <500 字符（最好 <200） | 简洁的触发条件列表 | 详细的功能描述段落 |
+| 5 | **长度: max 1024 字符** | 官方规格上限，建议 100-500 覆盖足够触发词 | 功能描述 + 5-10 个触发短语 | 过短(<50)导致覆盖不足 |
+| 6 | **禁止 XML 角括号** | `< >` 可能注入系统提示 | 纯文本描述 | "Use when <formatting> code" |
 | 7 | **写用户会问什么** | 描述什么请求会触发技能 | "用户请求代码审查时触发" | "本技能处理代码审查工作" |
 | 8 | **避免歧义** | 两个技能 description 相似会导致随机激活 | 每个技能描述有辨识度 | 通用模糊描述 |
 
-> 💡 **CSO 核心理念**：description 不是摘要，是**触发信号**。它在 Agent 启动时决定哪些技能被激活。
->
-> 📖 **详细规则**: [./writing-rules.md](./writing-rules.md) — R9: CSO Description 编写规则
+> 💡 **CSO 核心理念**：description 决定 Agent 是否激活此技能。它在 L1（启动时）加载，~100 tokens。
+> 
+> 💡 **推荐格式**: `[功能描述]. Use when [短语1], [短语2], or [短语3].` — 充分利用 1024 字符空间覆盖更多触发场景。
 
 ### 2. 必备章节
 
@@ -245,3 +247,7 @@ alternative_validation: "已完成 gap testing 和 retrieval testing"
 | 深度测试 | ≥90% | ≥60% | Type 4 复杂技能 / 规范强制型 |
 
 ---
+
+> 📖 **统一速查**: [best-practices.md](./best-practices.md) — 全项目知识导航枢纽
+> 🏗️ **设计原则**: [design-principles.md](./design-principles.md) — 铁律 + 分类
+> ✍️ **写作规则**: [writing-rules.md](./writing-rules.md) — R1-R10 高级规则
