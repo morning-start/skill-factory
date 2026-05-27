@@ -2,7 +2,7 @@
 name: skill-factory-creator
 version: v2.0.0
 author: skill-factory
-description: Use when creating new AI Agent skills from scratch, writing SKILL.md files, or starting skill development with TDD. Triggers on "create a skill", "new skill", "write SKILL.md", "from zero", "build a skill", "skill creation", "TDD for skills", or "start a new agent skill". Handles type classification, template selection, TDD RED/GREEN/REFACTOR flow, and quick path for simple skills
+description: Use when creating new AI Agent skills from scratch, writing SKILL.md files, or starting skill development with TDD. Triggers on "create a skill", "new skill", "write SKILL.md", "from zero", "build a skill", "skill creation", "TDD for skills", or "start a new agent skill"
 tags: [skill-creation, tdd-driven, skill-factory, type-classification, template-selection]
 dependency:
   parent: skill-factory
@@ -12,6 +12,9 @@ meta:
   complexity: intermediate
   standalone: true
   can_invoke_directly: true
+  tdd: simplified
+  tdd_waiver_reason: "协调器型技能，内置 Type1 快速路径(简化TDD)和完整 TDD 流程指引。详细 TDD 操作见 references/tdd-guide.md"
+  tdd_waiver_date: "2026-05-27"
 ---
 # 📦 Skill Factory Creator — 技能创建器 v2.0
 

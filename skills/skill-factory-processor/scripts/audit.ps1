@@ -20,6 +20,22 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Get-ProjectRoot {
+    $scriptDir = if ($MyInvocation.MyCommand.Path) { Split-Path $MyInvocation.MyCommand.Path } else { $PWD.Path }
+    $candidate = $scriptDir
+    while ($candidate) {
+        if (Test-Path (Join-Path $candidate "SKILL.md")) {
+            return (Resolve-Path $candidate).Path
+        }
+        $parent = Split-Path $candidate
+        if ($parent -eq $candidate) { break }
+        $candidate = $parent
+    }
+    return (Resolve-Path .).Path
+}
+
+$projectRoot = Get-ProjectRoot
+
 function Write-Result {
     param([string]$Status, [string]$Message)
     $colors = @{ "PASS" = "Green"; "WARN" = "Yellow"; "FAIL" = "Red" }
@@ -103,7 +119,6 @@ function Test-LayerCompliance {
     param([string]$FilePath)
     $score = 10; $max = 10; $issues = @()
     $dir = Split-Path (Resolve-Path $FilePath -ErrorAction SilentlyContinue)
-    $projectRoot = (Resolve-Path .).Path
     if ($dir -eq $projectRoot) {
         $depth = 0
     } else {
@@ -130,7 +145,7 @@ function Test-LinksValid {
     $baseDir = Split-Path (Resolve-Path $FilePath)
     $links = $Content | Select-String '\]\(([^)]+)\)' | ForEach-Object { $_.Matches.Groups[1].Value } |
         Where-Object { $_ -match '^(\./|\.\./)' -or $_ -notmatch '^(http|https|#)' }
-    foreach ($link in $links) { $target = Join-Path $baseDir $link; if (-not (Test-Path $target)) { $broken++ } }
+    foreach ($link in $links) { $target = [System.IO.Path]::GetFullPath((Join-Path $baseDir $link)); if (-not (Test-Path $target)) { $broken++ } }
     $score = if ($links.Count -gt 0) { [math]::Max(0, $max - $broken) } else { 5 }
     $issues = if ($broken -gt 0) { @("$broken broken internal link(s)") } else { @() }
     return @{ Score = $score; Max = $max; Issues = $issues }
@@ -193,7 +208,7 @@ function Invoke-SkillAudit {
 }
 
 if ($Project) {
-    $skillFiles = Get-ChildItem -Path . -Recurse -Filter "SKILL.md" | Select-Object -ExpandProperty FullName
+    $skillFiles = Get-ChildItem -Path $projectRoot -Recurse -Filter "SKILL.md" | Select-Object -ExpandProperty FullName
     $results = @()
     Write-Host "Project Audit: Found $($skillFiles.Count) SKILL.md files" -ForegroundColor Cyan
     foreach ($file in $skillFiles) {

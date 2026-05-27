@@ -2,7 +2,7 @@
 name: skill-factory-processor
 version: v2.0.0
 author: skill-factory
-description: Use when optimizing, refining, improving, auditing, validating, or checking AI Agent skills for quality and compliance. Triggers on "optimize this skill", "improve skill", "audit skill", "check compliance", "skill quality", "validate SKILL.md", "refactor skill", or "review skill". Handles 4 processing strategies (Simplify/Enrich/Beautify/Restructure) and full audit with scoring
+description: Use when optimizing, refining, improving, auditing, validating, or checking AI Agent skills for quality and compliance. Triggers on "optimize this skill", "improve skill", "audit skill", "check compliance", "skill quality", "validate SKILL.md", "refactor skill", or "review skill"
 tags: [skill-optimization, skill-auditing, skill-refactoring, quality-check, skill-factory]
 dependency:
   parent: skill-factory
@@ -12,6 +12,9 @@ meta:
   complexity: intermediate
   standalone: true
   can_invoke_directly: true
+  tdd: validation-only
+  tdd_waiver_reason: "加工+审计是验证行为本身。审计脚本(scripts/audit.ps1)提供自动化100分评分作为客观验证"
+  tdd_waiver_date: "2026-05-27"
 ---
 # ⚙️ Skill Factory Processor — 技能加工器 v2.0
 
