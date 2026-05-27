@@ -1,6 +1,6 @@
 ---
 name: skill-factory-processor
-version: v2.0.0
+version: v2.1.0
 author: skill-factory
 description: Use when optimizing, refining, improving, auditing, validating, or checking AI Agent skills for quality and compliance. Triggers on "optimize this skill", "improve skill", "audit skill", "check compliance", "skill quality", "validate SKILL.md", "refactor skill", or "review skill"
 tags: [skill-optimization, skill-auditing, skill-refactoring, quality-check, skill-factory]
@@ -16,7 +16,7 @@ meta:
   tdd_waiver_reason: "加工+审计是验证行为本身。审计脚本(scripts/audit.ps1)提供自动化100分评分作为客观验证"
   tdd_waiver_date: "2026-05-27"
 ---
-# ⚙️ Skill Factory Processor — 技能加工器 v2.0
+# ⚙️ Skill Factory Processor — 技能加工器 v2.1
 
 > **定位**: 加工优化 + 质量审计的双功能协调器
 > **架构**: 自含型子技能（可独立通过 `/processor` 触发）
@@ -157,6 +157,7 @@ meta:
 - [ ] 重新运行审计脚本，分数提升
 - [ ] 行数符合类型预期
 - [ ] CSO description 仍然有效
+- [ ] `skills-ref validate` 通过（格式规范未破坏）
 
 ### 对比验证
 - [ ] 加工前后对比报告
@@ -175,7 +176,30 @@ meta:
 
 ### 第一步：运行审计脚本（2 min）
 
-Processor 子技能包含自动化审计脚本，基于 100 分评分体系：
+Processor 子技能包含**双重验证工具链**：
+
+#### 1.1 官方规范验证（skills-ref）
+
+```bash
+# 安装（一次性）
+npm install -g skills-ref
+
+# 验证单个技能是否符合 agentskills.io 官方规范
+skills-ref validate ./target-skill/
+
+# 也支持直接指向 SKILL.md 文件
+skills-ref validate ./target-skill/SKILL.md
+```
+
+**输出解读**：
+- `Valid skill: <path>` → 通过，符合官方格式规范
+- `Validation failed for <path>: ...` → 不通过，列出具体格式问题
+
+> **skills-ref 检查范围**: name/version/description 字段存在性、Front Matter 格式、SKILL.md 文件存在性、description 长度 ≤1024 字符、name 格式 kebab-case
+>
+> ⚠️ **skill-factory 自身技能的预期行为**: 本项目（skill-factory）的子技能使用了**扩展 Front Matter 字段**（author/dependency/meta/tags/version），这些字段不在官方白名单中。因此对本项目自身技能运行 `skills-ref validate` 会报告 "Unexpected fields" 警告，这是**预期行为**，不影响功能。对待验证的目标技能（非 skill-factory 自身），此警告应作为格式问题修复。
+
+#### 1.2 质量评分审计（audit.ps1）
 
 ```powershell
 # 审计单个文件
@@ -187,6 +211,17 @@ Processor 子技能包含自动化审计脚本，基于 100 分评分体系：
 # 详细输出（显示检查过程）
 ./scripts/audit.ps1 -Path ./target/SKILL.md -Verbose
 ```
+
+**双重验证定位**：
+
+| 维度 | skills-ref (官方) | audit.ps1 (自建) |
+|------|-------------------|-----------------|
+| **检查目标** | 格式规范合规性 | 质量内容评分 |
+| **依据标准** | agentskills.io 官方规范 | skill-factory 100 分制 |
+| **典型输出** | Valid / Invalid + 错误列表 | X/100 分 + 各维度得分 |
+| **互补关系** | 先跑这个确保"合格" | 再跑这个评估"好坏" |
+
+**推荐执行顺序**: 先 `skills-ref validate`（格式门槛）→ 再 `audit.ps1`（质量评分）
 
 ### 第二步：解读评分报告（5 min）
 
@@ -274,7 +309,27 @@ Processor 子技能包含自动化审计脚本，基于 100 分评分体系：
 
 ## 🛠️ 自动化工具
 
-### 审计脚本 (`scripts/audit.ps1`)
+### 工具一：官方规范验证（skills-ref）
+
+[agentskills.io 官方验证工具](https://www.npmjs.com/package/skills-ref) (v0.1.5, MIT)
+
+```bash
+# 安装
+npm install -g skills-ref
+
+# 验证格式合规
+skills-ref validate <skill_path>
+
+# 读取元数据（JSON 输出）
+skills-ref read-properties <skill_path>
+
+# 生成 available_skills XML
+skills-ref to-prompt <skill_a> <skill_b>
+```
+
+**适用场景**: CI/CD 格式门禁、发布前规范检查、跨平台兼容性验证
+
+### 工具二：质量审计脚本 (`scripts/audit.ps1`)
 
 位于本子技能的 `scripts/` 目录下，功能包括：
 
@@ -323,7 +378,7 @@ Processor 子技能包含自动化审计脚本，基于 100 分评分体系：
 
 ```
 skills/skill-factory-processor/
-├── SKILL.md                      ← 本文件（协调器 ~160行）
+├── SKILL.md                      ← 本文件（协调器 ~200行）
 ├── references/
 │   ├── strategies.md             ← 4种加工策略详解
 │   └── audit-criteria.md         ← 审计标准与评分细则
@@ -361,5 +416,6 @@ skills/skill-factory-processor/
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| **v2.1.0** | 2026-05-27 | **集成 skills-ref CLI**: 审计模式新增双重验证工具链（官方格式验证 + 质量评分审计）；加工模式验证步骤增加 skills-ref 检查；自动化工具章节扩展为双工具说明 |
 | **v2.0.0** | 2026-05-27 | **v2.0 架构重构**: 从旧 processor 重构为双模式协调器（加工+审计）；整合 4 种加工策略；迁移审计脚本到本地 scripts/；新增 references/strategies.md 和 audit-criteria.md；可独立通过 `/processor` 触发 |
 | v1.0.0 | 2026-05-27 | 初始版本（已废弃） |
