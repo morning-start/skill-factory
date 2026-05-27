@@ -1,6 +1,6 @@
 ---
 name: skill-factory-creator
-version: v2.1.0
+version: v2.2.0
 author: skill-factory
 description: Use when creating new AI Agent skills from scratch, writing SKILL.md files, or starting skill development with TDD. Triggers on "create a skill", "new skill", "write SKILL.md", "from zero", "build a skill", "skill creation", "TDD for skills", or "start a new agent skill"
 tags: [skill-creation, tdd-driven, skill-factory, type-classification, template-selection]
@@ -16,7 +16,7 @@ meta:
   tdd_waiver_reason: "协调器型技能，内置 Type1 快速路径(简化TDD)和完整 TDD 流程指引。详细 TDD 操作见 references/tdd-guide.md"
   tdd_waiver_date: "2026-05-27"
 ---
-# 📦 Skill Factory Creator — 技能创建器 v2.1
+# 📦 Skill Factory Creator — 技能创建器 v2.2
 
 > **定位**: 从零创建新技能的完整工作流协调器
 > **架构**: 自含型子技能（可独立通过 `/creator` 触发）
@@ -55,39 +55,120 @@ meta:
 
 ---
 
-## 第一步：需求分析（5 min）
+## 第一步：需求分析 — 四维意图捕获（5 min）
 
-### 1.1 收集关键信息
+> **来源**: 官方 skill-creator Phase 1 意图捕获框架 + skill-factory 扩展
+> **核心**: 在编写任何内容前，通过 4 个结构化问题完整捕获用户意图，减少后期返工
 
-在开始之前，必须明确以下信息：
+### 1.1 官方四问框架
+
+```
+┌─────────────────────────────────────────────────────────┐
+│              四维意图捕获（4-Question Framework）         │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  Q1: 技能让 Agent 做什么？                               │
+│      → 驱动 SKILL.md 正文范围（做什么/不做什么）          │
+│                                                         │
+│  Q2: 何时触发？                                         │
+│      → 驱动 description 字段（CSO 触发条件）             │
+│                                                         │
+│  Q3: 期望的输出格式？                                   │
+│      → 塑造 Examples 章节和断言（输出长什么样）           │
+│                                                         │
+│  Q4: 是否需要测试验证？                                 │
+│      → 决定 TDD 深度（完整/简化/豁免）                   │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 1.2 逐问详解
+
+#### Q1: 技能让 Agent 做什么？（范围定义）
+
+| 收集项 | 说明 | 示例 |
+|--------|------|------|
+| **核心功能** | 一句话描述技能做什么 | "自动审计 SKILL.md 的合规性和质量" |
+| **边界（不做什么）** | 明确排除的范围 | "不修改文件，只读和分析" |
+| **目标用户** | 谁会使用这个技能 | 开发者 / 非技术用户 / 特定角色 |
+| **复杂度预判** | 单功能 vs 多模块 | low / medium / high |
+
+#### Q2: 何时触发？（CSO 输入）
+
+> 此问题的答案直接写入 `description` 字段，是技能被激活的唯一信号。
+
+| 收集项 | 说明 | 示例 |
+|--------|------|------|
+| **触发场景列表** | 用户会在哪些情况下提到它 | "audit skill", "check compliance", "validate SKILL.md" |
+| **同义词变体** | 不同措辞方式 | "检查"/"审查"/"评分"/"质检" |
+| **近误排除** | 不应触发但可能混淆的场景 | "write a skill" → 应触发 creator 非 processor |
+
+#### Q3: 期望的输出格式？（⭐ 新增维度）
+
+> **这是最常被遗漏的问题。** 明确输出格式直接决定 Examples 章节的质量和可测试性。
+
+| 输出类型 | 特征 | 典型场景 | Example 写法 |
+|---------|------|---------|-------------|
+| **文本报告** | 结构化文字，含分级/评分 | 审计、分析、评估类 | 展示实际输出的文本片段 |
+| **代码生成** | 完整可执行的代码块 | 创建、脚手架、模板类 | 展示生成的代码及注释 |
+| **文件操作** | 创建/修改/删除文件 | 发布、重构、迁移类 | 展示操作前后的 diff 或文件树 |
+| **交互引导** | 多轮对话、分步提问 | 咨询、设计、规划类 | 展示对话流程（Q→A→Q→A） |
+| **状态变更** | 系统状态发生变化 | 部署、配置、环境搭建 | 展示 before/after 对比 |
+
+**Q3 检查清单**：
 
 ```markdown
-## 需求收集清单
-
-- [ ] **技能名称**: kebab-case 命名（如 `git-commit-helper`）
-- [ ] **核心功能**: 用一句话描述这个技能做什么
-- [ ] **目标用户**: 谁会使用这个技能？（开发者/非技术用户/特定角色）
-- [ ] **触发场景**: 用户在什么情况下会需要这个技能？
-- [ ] **复杂度预判**: 单功能 vs 多模块？简单 vs 复杂？
-- [ ] **依赖项**: 是否需要调用其他技能/工具/API？
+- [ ] 技能执行后，用户拿到的是什么？（文件/文本/代码/状态变化）
+- [ ] 输出有固定的格式模板吗？（JSON/YAML/Markdown 表格）
+- [ ] 输出的关键指标有哪些？（分数/列表/布尔值）
+- [ ] Examples 章节能展示一个完整的"输入→输出"案例吗？
+- [ ] 输出是否可以直接用于下一步操作？
 ```
 
-### 1.2 输出：需求简报
+#### Q4: 是否需要测试验证？（TDD 决策）
 
-格式化输出为结构化需求：
+| 条件 | TDD 策略 | Front Matter 标记 |
+|------|---------|------------------|
+| Type 1 + 单一非关键功能 | **简化** (跳过压力场景) | `tdd: simplified` |
+| 参考文档型（纯信息检索） | **仅验证** (不写 RED/GREEN) | `tdd: validation-only` |
+| Type 2-4 关键功能 | **完整** (RED→GREEN→REFACTOR) | 不标记或 `tdd: full` |
+| 紧急修复 / MVP | **延期** (事后补测) | `tdd: deferred` |
+
+> 📖 **完整 TDD 方法论**: [references/tdd-guide.md](references/tdd-guide.md) — 含 CSO Eval Query 设计方法
+
+### 1.3 输出：四维需求简报
+
+将 4 问答案汇总为结构化简报：
 
 ```yaml
-skill_name: {name}
-one_liner: "{一句话描述}"
-target_user: {目标用户}
-trigger_scenes:
-  - "{场景1}"
-  - "{场景2}"
-estimated_complexity: {low/medium/high}
-dependencies: [{依赖列表}]
+intent_capture:
+  q1_scope:
+    core_function: "{一句话描述}"
+    out_of_scope: ["{排除项1}", "{排除项2}"]
+    target_user: "{开发者/非技术/特定角色}"
+    complexity: {low/medium/high}
+
+  q2_trigger:
+    primary_triggers: ["{触发词1}", "{触发词2}", "{触发词3}"]
+    synonyms: ["{同义词组}"]
+    near_miss_exclusions:
+      - query: "{易混淆输入}"
+        should_trigger: "{其他技能名}"
+        reason: "{为什么混淆}"
+
+  q3_output:
+    format: "{文本报告/代码生成/文件操作/交互引导/状态变更}"
+    output_template: "{输出格式描述或示例结构}"
+    key_metrics: ["{指标1}", "{指标2}"]
+    example_scenario: "{一个完整的输入→输出案例描述}"
+
+  q4_validation:
+    tdd_strategy: {simplified/validation-only/full/deferred}
+    reason: "{选择该策略的原因}"
+    needs_cso_eval: {true/false}
 ```
 
-> 💡 **提示**: 如果用户无法清晰描述需求，使用 AskUserQuestion 工具澄清。
+> 💡 **提示**: 如果用户无法清晰回答某个问题，使用 AskUserQuestion 工具澄清。特别是 Q3（输出格式）——大多数用户不会主动想到这一点，建议主动询问："你希望技能执行完成后给你什么样的结果？"
 
 ---
 
@@ -445,6 +526,7 @@ skills/skill-factory-creator/
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| **v2.2.0** | 2026-05-27 | **四维意图捕获框架**: 第一步需求分析从 6 项清单升级为官方 4 问框架（Q1 范围/Q2 触发/Q3 输出格式⭐新增/Q4 TDD 决策）；Q3 含 5 种输出类型分类表 + 检查清单；输出简报升级为 intent_capture 四维 YAML 结构 |
 | **v2.1.0** | 2026-05-27 | **新增 CSO Eval Query 方法论**: references/tdd-guide.md 新增"CSO 触发率评估方法论"完整章节（Eval Query 设计规范、手动评估流程、迭代优化循环、与 TDD 协作关系）；支持用户自行量化评估 description 触发准确率 |
 | **v2.0.0** | 2026-05-27 | **v2.0 架构重构**: 从 orchestrator 模式重构为自含型 coordinator；整合 TDD 流程、类型判定、模板选择；新增 Type 1 快速路径；引用全局 references + 自含 references；可独立通过 `/creator` 触发 |
 | v1.0.0 | 2026-05-27 | 初始版本（orchestrator + workers 模式，已废弃） |
