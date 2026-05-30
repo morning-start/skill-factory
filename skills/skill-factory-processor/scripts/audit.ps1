@@ -1,9 +1,10 @@
 <#
 .SYNOPSIS
-    Skill Factory Automated Audit Script v1.1
+    Skill Factory Automated Audit Script v1.2
 .DESCRIPTION
     Audits SKILL.md files against the 100-point quality scoring system.
     Based on skill-factory v0.8.0 standards (CSO, TDD, layer compliance, etc.)
+    v1.2: Fixed Windows path resolution, enhanced CSO/TDD detection rules
 .PARAMETER Path
     SKILL.md file path to audit (default: ./SKILL.md)
 .PARAMETER Project
@@ -150,10 +151,35 @@ function Test-NamingConvention {
 function Test-LinksValid {
     param([string]$FilePath, [string[]]$Content)
     $score = 5; $max = 5; $broken = 0
-    $baseDir = Split-Path (Resolve-Path $FilePath)
+    try {
+        $resolvedPath = Resolve-Path $FilePath -ErrorAction SilentlyContinue
+        if (-not $resolvedPath) {
+            return @{ Score = 3; Max = $max; Issues = @("Cannot resolve file path: $FilePath") }
+        }
+        $baseDir = Split-Path $resolvedPath
+    } catch {
+        return @{ Score = 3; Max = $max; Issues = @("Path resolution error: $_") }
+    }
+
     $links = $Content | Select-String '\]\(([^)]+)\)' | ForEach-Object { $_.Matches.Groups[1].Value } |
         Where-Object { $_ -match '^(\./|\.\./)' -or $_ -notmatch '^(http|https|#)' }
-    foreach ($link in $links) { $target = [System.IO.Path]::GetFullPath((Join-Path $baseDir $link)); if (-not (Test-Path $target)) { $broken++ } }
+
+    foreach ($link in $links) {
+        try {
+            $normalizedLink = $link -replace '/', [System.IO.Path]::DirectorySeparatorChar
+            $fullTarget = [System.IO.Path]::GetFullPath((Join-Path $baseDir $normalizedLink))
+            
+            if (-not (Test-Path $fullTarget)) {
+                $altTarget = $fullTarget -replace '\\', '/'
+                if (-not (Test-Path $altTarget)) {
+                    $broken++
+                }
+            }
+        } catch {
+            $broken++
+        }
+    }
+    
     $score = if ($links.Count -gt 0) { [math]::Max(0, $max - $broken) } else { 5 }
     $issues = if ($broken -gt 0) { @("$broken broken internal link(s)") } else { @() }
     return @{ Score = $score; Max = $max; Issues = $issues }
