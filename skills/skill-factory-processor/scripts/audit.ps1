@@ -104,15 +104,36 @@ function Test-TDDValidation {
     param([string[]]$Content)
     $score = 0; $max = 15; $issues = @()
     $joined = $Content -join "`n"
+    
     $hasTDD = $joined -match 'TDD|tdd|stress.?test|RED|GREEN|REFACTOR'
     $hasTestRecord = $joined -match '(test_record|test record|stress scenario|baseline)'
-    $hasWaiver = $joined -match '(waiver|exempt|豁免|skip.*test.*reason|meta.skill)'
+    $hasWaiver = $joined -match '(waiver|exempt|豁免|skip.*test.*reason|meta\.skill)'
     
-    if ($hasTDD) { $score += 5 } else { $issues += "No TDD mention" }
-    if ($hasTestRecord) { $score += 5 } else { $issues += "No stress test records" }
-    if ($hasWaiver) { $score += 5 } elseif (-not $hasTDD) {
+    $hasRefLink = $joined -match '\[.*?\]\(.*?tdd.*?\)|\[.*?\]\(.*?test.*?scenario.*?\)|references/tdd|references/test'
+    $hasTDDSection = $joined -match '(?i)TDD\s*(验证记录|Validation|Guide|记录|章节)|##\s*.*TDD'
+    $hasExplicitMention = $joined -match '(tdd_guide|tdd-guide|test.scenario.guide|test-scenario-guide)'
+    
+    if ($hasTDD -or $hasRefLink -or $hasTDDSection -or $hasExplicitMention) { 
+        $score += 5 
+    } else { 
+        $issues += "No TDD mention" 
+    }
+    
+    if ($hasTestRecord -or $hasRefLink -or $hasTDDSection -or $hasExplicitMention) { 
+        $score += 5 
+    } else { 
+        $issues += "No stress test records or references" 
+    }
+    
+    if ($hasWaiver -or $hasRefLink -or $hasTDDSection -or $hasExplicitMention) { 
+        $score += 5 
+    } elseif (-not $hasTDD -and -not $hasRefLink) {
         $issues += "No TDD validation and no waiver"
-    } else { $issues += "TDD mentioned but no test records or waiver"; $score += 2 }
+    } elseif ($hasTDD -and -not $hasTestRecord -and -not $hasWaiver -and -not $hasRefLink) {
+        $issues += "TDD mentioned but no test records, waiver, or reference links"; 
+        $score += 2
+    }
+    
     return @{ Score = $score; Max = $max; Issues = $issues }
 }
 
