@@ -1,0 +1,235 @@
+version: 1.0
+skill: skill-factory-processor
+created_date: "2026-05-30"
+author: skill-factory
+based_on: "harness-integration-guide.md v1.0"
+
+metadata:
+  total_scenarios: 20
+  should_trigger_count: 10
+  should_not_trigger_count: 10
+  coverage_dimensions:
+    - 措辞变化 (3)
+    - 明确度变化 (3)
+    - 细节程度 (2)
+    - 复杂度变化 (2)
+  quality_gate_threshold: 85
+
+scenarios:
+  # ========== Should-trigger (正例) ==========
+  should_trigger:
+    # 维度 1: 措辞变化 (3个)
+    - id: st-01
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 正式
+      prompt: "请帮我优化一下现有的 skill-factory-processor"
+      expected_trigger: true
+      notes: "最标准的触发方式，包含'优化'关键词"
+      
+    - id: st-02
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 随意
+      prompt: "加工这个技能"
+      expected_trigger: true
+      notes: "'加工'是 processor 的核心动词"
+      
+    - id: st-03
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 审计专用
+      prompt: "审计一下所有 SKILL.md 文件"
+      expected_trigger: true
+      notes: "'审计'是 processor 的关键功能之一"
+
+    # 维度 2: 明确度变化 (3个)
+    - id: st-04
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 直接命名
+      prompt: "用 processor 检查 creator 的质量"
+      expected_trigger: true
+      
+    - id: st-05
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 质量问题描述
+      prompt: "这个技能的 description 不符合 CSO 规范，帮我修复"
+      expected_trigger: true
+      
+    - id: st-06
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 健康扫描请求
+      prompt: "运行一次 stocktake 健康扫描"
+      expected_trigger: true
+      notes: "Stocktake 模式是 processor 的三大模式之一"
+
+    # 维度 3: 细节程度 (2个)
+    - id: st-07
+      type: should-trigger
+      dimension: 细节程度
+      variant: 简短
+      prompt: "审计这个项目"
+      expected_trigger: true
+      
+    - id: st-08
+      type: should-trigger
+      dimension: 细节程度
+      variant: 详细上下文
+      prompt: |
+        我发现项目的平均审计分数从 90% 下降到了 82%，
+        请帮我分析原因并应用合适的加工策略进行修复，
+        特别关注 TDD 验证和链接有效性这两个维度
+      expected_trigger: true
+
+    # 维度 4: 复杂度变化 (2个)
+    - id: st-09
+      type: should-trigger
+      dimension: 复杂度变化
+      variant: 单步请求
+      prompt: "优化技能"
+      expected_trigger: true
+      
+    - id: st-10
+      type: should-trigger
+      dimension: 复杂度变化
+      variant: 多步嵌入链
+      prompt: "先审计整个项目，找出分数最低的技能，然后对它应用精简策略(A策略)，最后重新审计验证改进效果"
+      expected_trigger: true
+      notes: "完整的工作流链路应触发 processor"
+
+  # ========== Should-not-trigger (负例) ==========
+  should_not_trigger:
+    # 近误类型: 同域不同操作 (3个)
+    - id: snt-01
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 创建请求
+      prompt: "创建一个新的处理器技能"
+      expected_trigger: false
+      target_skill: creator
+      notes: "包含'处理器'但动作是'创建'非'优化'"
+      
+    - id: snt-02
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 发布请求
+      prompt: "发布 processor 的 v2.4.0 版本"
+      expected_trigger: false
+      target_skill: publisher
+      notes: "'发布'应触发生成器非加工器"
+      
+    - id: snt-03
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 合并请求
+      prompt: "把 processor 和 assembler 合并成一个超级技能"
+      expected_trigger: false
+      target_skill: assembler
+      notes: "'合并'是 assembler 的职责"
+
+    # 近误类型: 同词不同义 (2个)
+    - id: snt-04
+      type: should-not-trigger
+      dimension: 近误: 同词不同义
+      variant: CPU处理器
+      prompt: "优化我的 CPU 处理器性能"
+      expected_trigger: false
+      target_skill: null
+      notes: "'processor'在此指硬件非 Agent Skill"
+      
+    - id: snt-05
+      type: should-not-trigger
+      dimension: 近误: 同词不同义
+      variant: 文字处理
+      prompt: "处理这份文档的格式问题"
+      expected_trigger: false
+      target_skill: null
+      notes: "'处理'在此指文本编辑非技能加工"
+
+    # 近误类型: 泛化请求 (2个)
+    - id: snt-06
+      type: should-not-trigger
+      dimension: 近误: 泛化请求
+      variant: 宽泛改进
+      prompt: "改进我的开发工作流"
+      expected_trigger: false
+      target_skill: null
+      notes: "太宽泛，不特指技能优化"
+      
+    - id: snt-07
+      type: should-not-trigger
+      dimension: 近误: 泛化请求
+      variant: 质量管理
+      prompt: "建立代码质量管理流程"
+      expected_trigger: false
+      target_skill: null
+      notes: "通用质量管理非技能特定审计"
+
+    # 近误类型: 跨技能边界 (2个)
+    - id: snt-08
+      type: should-not-trigger
+      dimension: 近误: 跨技能边界
+      variant: 测试场景设计
+      prompt: "为 processor 设计测试用例和 scenarios"
+      expected_trigger: false
+      target_skill: creator
+      notes: "测试场景设计是 creator 的新能力"
+      
+    - id: snt-09
+      type: should-not-trigger
+      dimension: 近误: 跨技能边界
+      variant: CI/CD配置
+      prompt: "配置 GitHub Actions 自动发布流水线"
+      expected_trigger: false
+      target_skill: publisher
+      notes: "CI/CD 流水线生成是 publisher 的职责"
+
+    # 边缘情况 (1个)
+    - id: snt-10
+      type: should-not-trigger
+      dimension: 边缘情况
+      variant: 空输入
+      prompt: ""
+      expected_trigger: false
+      target_skill: null
+      notes: "空输入不应触发任何技能"
+
+---
+# 测试执行指南
+
+## 如何使用此 Scenario 文件
+
+### 1. Smoke Test (快速验证)
+```bash
+# 使用 mock 模式快速验证触发准确率
+npx harness skill-factory-processor --mock --scenarios tests/scenarios/skill-factory-processor/scenarios.yaml
+```
+
+### 2. SDK Evaluation (完整评估)
+```bash
+# 使用真实 Copilot SDK 进行端到端测试
+npx harness skill-factory-processor --eval --scenarios tests/scenarios/skill-factory-processor/scenarios.yaml
+```
+
+### 3. 手动验证清单
+- [ ] 所有 10 个正例都成功触发
+- [ ] 所有 10 个负例都正确拒绝
+- [ ] 触发准确率 ≥ 90%
+- [ ] 无误报或漏报
+
+## 通过标准
+
+| 指标 | 目标值 | 最低可接受值 |
+|------|--------|-------------|
+| 正例触发率 | 100% | ≥ 95% |
+| 负例拒止率 | 100% | ≥ 95% |
+| 总体准确率 | ≥ 98% | ≥ 90% |
+
+## 更新日志
+
+| 日期 | 版本 | 变更 |
+|------|------|------|
+| 2026-05-30 | v1.0 | 初始版本：20个场景(10正例+10负例)，覆盖4维度 |

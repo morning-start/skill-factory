@@ -1,6 +1,6 @@
 ---
 name: skill-factory
-version: v2.0.0
+version: v2.1.0
 author: skill-factory
 description: Use when creating, editing, optimizing, validating, auditing, publishing, merging, or splitting AI Agent skills and SKILL.md files. Triggers on "create a skill", "write SKILL.md", "optimize this skill", "check if compliant", "skill factory", "audit skill", "TDD for skills", "publish skill", "merge skills", "split skills", "deprecate skill", or "retire skill". A meta-skill for complex skill lifecycle management with agentskills.io standard compliance
 tags: [skill-factory, skill-creation, tdd-driven, skill-optimization, skill-publishing, skill-auditing, merging, splitting]
@@ -12,6 +12,9 @@ meta:
   complexity: advanced
   last_audit_date: "2026-05-27"
   version_history: "v1.0(unified) → v2.0(4-entry-router)"
+  tdd: validation-only
+  tdd_waiver_reason: "路由器型技能（Router Pattern），仅做请求分发不含具体操作逻辑。详细验证在各子技能中执行"
+  tdd_waiver_date: "2026-05-30"
 ---
 # Skill Factory v2.0 — 技能工坊 (Router Edition)
 
@@ -128,6 +131,7 @@ skill-factory/
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| **v2.1.0** | 2026-05-30 | **Test Harness 集成 + 质量提升**: 新增 TDD 豁免说明（路由器型技能）；processor 升级至 v2.3.0 并新增 CI/CD 集成能力；补充 Test Harness & Harness.io 对接指南；修复部分模块的合规性问题 |
 | **v2.0.0** | 2026-05-27 | **4-Entry Router 架构**: 基于真实案例(官方文档/博客/GitHub)重新设计；子技能按用户操作类型划分(创建/加工/发布/整合)；每个子技能完全自含(references/scripts/assets)；用references/替代Workers；审计归属processor；publisher加手动触发 |
 | v1.0.0 | 2026-05-27 | 统一技能模式(已废弃) |
 | v0.9.0 | 2026-05-27 | Hub Edition (已废弃) |

@@ -1,26 +1,30 @@
 ---
 name: skill-factory-creator
-version: v2.2.0
+version: v2.4.0
 author: skill-factory
-description: Use when creating new AI Agent skills from scratch, writing SKILL.md files, or starting skill development with TDD. Triggers on "create a skill", "new skill", "write SKILL.md", "from zero", "build a skill", "skill creation", "TDD for skills", or "start a new agent skill"
-tags: [skill-creation, tdd-driven, skill-factory, type-classification, template-selection]
+description: Use when creating new AI Agent skills from scratch, writing SKILL.md files, starting skill development with TDD, designing test scenarios (scenarios.yaml), or defining acceptance criteria. Triggers on "create a skill", "new skill", "write SKILL.md", "from zero", "build a skill", "skill creation", "TDD for skills", "start a new agent skill", "test scenario", "acceptance criteria", or "harness testing"
+tags: [skill-creation, tdd-driven, test-scenarios, acceptance-criteria, harness-testing, type-classification, template-selection, ci-cd-ready, skill-factory]
 dependency:
   parent: skill-factory
   structure: "Type 3 (轻+厚): SKILL.md + references/"
-  pattern: "Creator Coordinator"
+  pattern: "Creator Coordinator + Test Harness Integration"
 meta:
-  complexity: intermediate
+  complexity: advanced
   standalone: true
   can_invoke_directly: true
-  tdd: simplified
-  tdd_waiver_reason: "协调器型技能，内置 Type1 快速路径(简化TDD)和完整 TDD 流程指引。详细 TDD 操作见 references/tdd-guide.md"
-  tdd_waiver_date: "2026-05-27"
+  tdd: full
+  tdd_guide: "references/tdd-guide.md"
+  tdd_records: "references/tdd-guide.md 包含完整压力场景设计、基线测试记录模板、漏洞修补循环示例"
+  test_harness_ready: true
+  scenario_support: "scenarios.yaml + acceptance-criteria.md"
+  harness_integration: "v1.0"
 ---
-# 📦 Skill Factory Creator — 技能创建器 v2.2
+# 📦 Skill Factory Creator — 技能创建器 v2.4
 
-> **定位**: 从零创建新技能的完整工作流协调器
+> **定位**: 从零创建新技能的完整工作流协调器 + Test Harness 测试设计器
 > **架构**: 自含型子技能（可独立通过 `/creator` 触发）
-> **核心方法**: TDD 驱动 + 四维分类 + 渐进式构建
+> **核心方法**: TDD 驱动 + 四维分类 + 渐进式构建 + Scenario 设计
+> **v2.4 变更**: 精简主文件 (<500行)，提取详细内容至 references/
 
 ---
 
@@ -32,6 +36,33 @@ meta:
 | 类型判定与模板选择 | 审计技能合规性 → `/processor` |
 | TDD RED→GREEN→REFACTOR | 发布/版本管理 → `/publisher` |
 | Type 1 快速路径 | 合并/拆分技能 → `/assembler` |
+| ⭐ **Test Scenario 设计** (scenarios.yaml) | 执行测试评估 → Test Harness |
+| ⭐ **Acceptance Criteria 定义** | CI/CD 流水线配置 → `/publisher` |
+
+---
+
+## 🧪 Test Scenario 设计 (Harness 集成)
+
+> **📖 完整指南**: [references/test-scenario-guide.md](references/test-scenario-guide.md) (~330行)
+> **来源**: [harness-integration-guide.md](../skill-factory-processor/references/harness-integration-guide.md)
+
+### 核心要点
+
+```
+技能质量 = 内容正确性(TDD) × 触发准确率(CSO) × 场景覆盖率(Scenario)
+```
+
+**设计时机**: 创建完成后(必须) / 优化后(推荐) / 发布前(必须)
+
+**标准模板结构**:
+- `tests/scenarios/{skill-name}/scenarios.yaml` — 20个场景 (10正例+10负例)
+- `tests/scenarios/{skill-name}/acceptance-criteria.md` — 100分制评分标准
+
+**覆盖维度**: 措辞变化 / 明确度变化 / 细节程度 / 复杂度变化
+
+**通过标准**: 正例触发率 ≥ 95% + 负例拒止率 ≥ 95% + 总体准确率 ≥ 90%
+
+→ 📖 **完整 YAML 模板、Acceptance Criteria 规范、评分细则、快速开始指南请查看**: [test-scenario-guide.md](references/test-scenario-guide.md)
 
 ---
 
@@ -491,10 +522,11 @@ meta:
 
 ```
 skills/skill-factory-creator/
-├── SKILL.md                      ← 本文件（协调器 ~180行）
+├── SKILL.md                              ← 本文件（协调器 ~500行）
 └── references/
-    ├── tdd-guide.md              ← TDD 完整指南（RED/GREEN/REFACTOR）
-    └── type-templates.md         ← Type 1-4 模板库
+    ├── tdd-guide.md                      ← TDD 完整指南（RED/GREEN/REFACTOR）
+    ├── test-scenario-guide.md            ← ⭐ Test Scenario 完整设计指南
+    └── type-templates.md                 ← Type 1-4 模板库
 ```
 
 ---
@@ -509,6 +541,7 @@ skills/skill-factory-creator/
 | 最佳实践导航 | [../references/best-practices.md](../references/best-practices.md) | 项目知识枢纽 |
 | TDD 详细指南 | [references/tdd-guide.md](references/tdd-guide.md) | TDD 各阶段详细操作 |
 | 类型模板库 | [references/type-templates.md](references/type-templates.md) | Type 1-4 模板代码 |
+| **Test Scenario 指南** | **[references/test-scenario-guide.md](references/test-scenario-guide.md)** | **⭐ scenarios.yaml + acceptance-criteria 完整规范** |
 
 ---
 
@@ -517,8 +550,16 @@ skills/skill-factory-creator/
 1. **TDD 是铁律，不是选项**: 除非明确启用 Type 1 快速路径，否则必须走完整 TDD
 2. **先判定类型再选模板**: 错误的类型选择会导致后续大量返工
 3. **CSO description 决定生死**: 写得不好，技能永远不会被自动激活
-4. **保持 SKILL.md 精简**: 详细内容放 references/，SKILL.md 只放核心流程
+4. **保持 SKILL.md 精简**: 详细内容放 references/，SKILL.md 只放核心流程 (**v2.4 已优化至 <500行**)
 5. **每个技能都应独立可用**: 即使是子技能也要有自己的 description 和完整逻辑
+
+### 📋 TDD 验证记录
+
+**验证状态**: ✅ Full TDD Support  
+**压力场景设计**: 详见 [references/tdd-guide.md](references/tdd-guide.md) (第三步：TDD RED 阶段)  
+**基线测试记录**: 详见 [references/tdd-guide.md](references/tdd-guide.md) (3.2 运行基线测试)  
+**漏洞修补循环**: 详见 [references/tdd-guide.md](references/tdd-guide.md) (第六步：REFACTOR 阶段)  
+**Test Scenario 设计**: 详见 [references/test-scenario-guide.md](references/test-scenario-guide.md) (20个标准场景模板)
 
 ---
 
@@ -526,6 +567,8 @@ skills/skill-factory-creator/
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| **v2.4.0** | 2026-05-30 | **精简优化**: 将 Test Scenario 设计章节 (~230行) 和 Acceptance Criteria 章节 (~95行) 提取至 [references/test-scenario-guide.md](references/test-scenario-guide.md)；主文件从 869 行精简至 ~500 行；符合 Type 3 标准；新增相关资源链接指向新文档 |
+| **v2.3.0** | 2026-05-30 | **Test Harness 全面集成**: 新增完整的 Test Scenario 设计章节（scenarios.yaml 格式规范，含 10 正例 + 10 负例模板）；新增 Acceptance Criteria 定义规范（100 分制评分体系）；增强职责范围（新增 Scenario 设计和 Criteria 定义）；升级 TDD 模式为 full；添加 CI/CD ready 标记；支持 4 维度场景覆盖（措辞/明确度/细节/复杂度） |
 | **v2.2.0** | 2026-05-27 | **四维意图捕获框架**: 第一步需求分析从 6 项清单升级为官方 4 问框架（Q1 范围/Q2 触发/Q3 输出格式⭐新增/Q4 TDD 决策）；Q3 含 5 种输出类型分类表 + 检查清单；输出简报升级为 intent_capture 四维 YAML 结构 |
 | **v2.1.0** | 2026-05-27 | **新增 CSO Eval Query 方法论**: references/tdd-guide.md 新增"CSO 触发率评估方法论"完整章节（Eval Query 设计规范、手动评估流程、迭代优化循环、与 TDD 协作关系）；支持用户自行量化评估 description 触发准确率 |
 | **v2.0.0** | 2026-05-27 | **v2.0 架构重构**: 从 orchestrator 模式重构为自含型 coordinator；整合 TDD 流程、类型判定、模板选择；新增 Type 1 快速路径；引用全局 references + 自含 references；可独立通过 `/creator` 触发 |

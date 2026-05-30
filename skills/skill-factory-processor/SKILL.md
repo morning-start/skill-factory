@@ -1,20 +1,22 @@
 ---
 name: skill-factory-processor
-version: v2.2.0
+version: v2.4.0
 author: skill-factory
-description: Use when optimizing, refining, improving, auditing, validating, checking AI Agent skills for quality and compliance, or performing health stocktake scans. Triggers on "optimize this skill", "improve skill", "audit skill", "check compliance", "skill quality", "validate SKILL.md", "refactor skill", "review skill", "stocktake skills", "health scan", "skill inventory"
-tags: [skill-optimization, skill-auditing, skill-refactoring, quality-check, skill-factory]
+description: Use when optimizing, refining, improving, auditing, validating, checking AI Agent skills for quality and compliance, performing health stocktake scans, or integrating Harness AI Agents for automated quality management. Triggers on "optimize this skill", "improve skill", "audit skill", "check compliance", "skill quality", "validate SKILL.md", "refactor skill", "review skill", "stocktake skills", "health scan", "skill inventory", "harness agents", "automated review", "CI/CD quality gate"
+tags: [skill-optimization, skill-auditing, skill-refactoring, quality-check, harness-agents, automated-review, ci-cd-quality-gate, stocktake-scan, skill-factory]
 dependency:
   parent: skill-factory
   structure: "Type 3 (轻+厚): SKILL.md + references/ + scripts/"
-  pattern: "Processor Coordinator"
+  pattern: "Processor Coordinator + Harness AI Hub"
 meta:
-  complexity: intermediate
+  complexity: advanced
   standalone: true
   can_invoke_directly: true
   tdd: validation-only
-  tdd_waiver_reason: "加工+审计是验证行为本身。审计脚本(scripts/audit.ps1)提供自动化100分评分作为客观验证"
-  tdd_waiver_date: "2026-05-27"
+  tdd_waiver_reason: "加工+审计是验证行为本身。审计脚本(scripts/audit.ps1)提供自动化100分评分作为客观验证。Harness Agents 集成通过 harness-integration-guide.md 验证"
+  tdd_waiver_date: "2026-05-30"
+  harness_agents_ready: true
+  automation_level: "full"
 ---
 # ⚙️ Skill Factory Processor — 技能加工器 v2.2
 
@@ -32,6 +34,304 @@ meta:
 | 审计技能合规性（100 分评分） | 发布/版本管理 → `/publisher` |
 | 技能质量评估与改进建议 | 合并/拆分技能 → `/assembler` |
 | 运行自动化审计脚本 | 需求分析 → `/creator` |
+| ⭐ **Harness AI Agents 对接** | 创建测试场景 → `/creator` |
+| ⭐ **CI/CD 质量门禁配置** | 流水线生成 → `/publisher` |
+
+---
+
+## 🤖 Harness AI Agents 对接 (新增)
+
+> **来源**: [harness-integration-guide.md](references/harness-integration-guide.md)
+> **目的**: 利用 Harness.io 的 AI Agents 实现全自动化的技能质量管理和持续改进
+
+### 核心能力映射
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│           Processor × Harness Agents 架构                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ① Code Review Agent                                        │
+│     ├─ 自动审查 SKILL.md 质量                               │
+│     ├─ 7 维度评分 + 改进建议                                │
+│     └─ PR 评论集成                                          │
+│                         ↓                                   │
+│  ② CI Autofix Agent                                         │
+│     ├─ 审计问题自动修复                                     │
+│     ├─ 基于最佳实践自动改写                                  │
+│     └─ 创建 Fix PR                                          │
+│                         ↓                                   │
+│  ③ DevOps Agent                                             │
+│     ├─ CI/CD 流水线自动生成                                 │
+│     ├─ 质量门禁配置                                         │
+│     └─ 监控 Dashboard 搭建                                  │
+│                         ↓                                   │
+│  ④ Knowledge Graph Agent                                    │
+│     ├─ 技能关系图谱构建                                     │
+│     ├─ 冗余/孤岛检测增强                                    │
+│     └─ 智能推荐合并/拆分方案                                │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Agent 1: Code Review Agent — 自动审查
+
+#### Prompt 模板
+
+```markdown
+## Harness Code Review Prompt for SKILL.md
+
+你是一个专业的 Skill Quality Reviewer。请审查以下 SKILL.md 文件的质量：
+
+**文件路径**: {skill_path}
+
+**审查维度（共 7 项，每项满分 15 分，总分 105 分）**:
+
+1. **Front Matter 完整性** (15 分)
+   - 必填字段完整：name/version/description/tags
+   - description 以 "Use when..." 开头
+   - 长度在 50-1024 字符之间
+   - 无 XML 角括号
+
+2. **CSO Description 质量** (15 分)
+   - 只包含触发条件，不含功能描述
+   - 覆盖主要触发词变体
+   - 触发准确率预估 ≥ 80%
+
+3. **TDD 验证记录** (15 分)
+   - 包含压力场景描述或豁免说明
+   - 豁免原因合理且明确
+   - 有验证日期
+
+4. **必备章节完整性** (15 分)
+   - 目标/定位说明清晰
+   - 操作步骤可执行
+   - 示例端到端完整
+   - 注意事项具体有用
+
+5. **层级合规性** (10 分)
+   - 目录深度 ≤ 3 层
+   - 文件命名符合 kebab-case
+   - 引用路径正确
+
+6. **链接有效性** (10 分)
+   - 内部链接有效（references/）
+   - 外部链接可访问
+   - 无死链
+
+7. **内容质量** (25 分)
+   - 高信号密度（无冗余）
+   - 结构清晰逻辑连贯
+   - 示例实用可运行
+   - Gotchas 真实有价值
+
+**输出格式**:
+
+```markdown
+## 📊 审查报告
+
+**总评分**: XX/105 (Grade X)
+
+### 各维度得分:
+| 维度 | 得分 | 问题数 |
+|------|------|--------|
+| Front Matter | XX/15 | N |
+| CSO Description | XX/15 | N |
+| TDD Validation | XX/15 | N |
+| Essential Sections | XX/15 | N |
+| Structure Compliance | XX/10 | N |
+| Link Validity | XX/10 | N |
+| Content Quality | XX/25 | N |
+
+### 🔴 必须修复 (P0 - Blocking):
+- [ ] **问题1**: 描述 + 具体位置(行号) + 修复建议 + 参考文档链接
+
+### 🟡 建议改进 (P1 - Recommended):
+- [ ] **问题2**: 描述 + 优化建议
+
+### ✅ 通过项:
+- 项目1: 符合标准的具体说明
+
+### 📈 总体评价:
+- 优势: ...
+- 待改进: ...
+- 建议: 下一步行动...
+```
+```
+
+#### GitHub Actions 集成示例
+
+```yaml
+# .github/workflows/skill-auto-review.yml
+name: Skill Auto Review
+
+on:
+  pull_request:
+    paths:
+      - '**/SKILL.md'
+
+jobs:
+  auto-review:
+    runs-on: ubuntu-latest
+    name: Automated Skill Quality Review
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Run Audit Script
+        id: audit
+        shell: pwsh
+        run: |
+          $output = ./skills/skill-factory-processor/scripts/audit.ps1 -Project -Verbose
+          echo "$output"
+          
+          # 提取分数
+          $avgMatch = $output | Select-String "Project Average: (\d+)%"
+          if ($avgMatch) {
+            echo "score=$($avgMatch.Matches.Groups[1].Value)" >> $env:GITHUB_OUTPUT
+          }
+      
+      - name: Generate Review Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const score = '${{ steps.audit.outputs.score }}';
+            const comment = `## 🔍 Skill Factory Auto Review
+            
+            ### 📊 Quality Score: ${score}/100
+            
+            ${score >= 85 ? '✅ **Quality Gate PASSED**' : '❌ **Quality Gate FAILED**'}
+            
+            ---
+            *Review generated by skill-factory processor*
+            *Based on harness-integration-guide.md standards*`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: Quality Gate Check
+        if: steps.audit.outputs.score < 85
+        run: |
+          echo "❌ Quality gate failed: ${{ steps.audit.outputs.score }}% < 85%"
+          exit 1
+```
+
+---
+
+### Agent 2: CI Autofix Agent — 自动修复
+
+#### Prompt 模板
+
+```markdown
+## Harness CI Autofix Prompt
+
+你是 Skill Quality Autofixer。基于审计结果自动修复 SKILL.md 问题：
+
+**审计结果**:
+\`\`\`
+{audit_output}
+\`\`\`
+
+**修复规则** (优先级从高到低):
+
+1. **P0 - Front Matter 缺失**
+   - 补充必填字段 (name/version/description/tags)
+   - 格式化 description 为 "Use when..." 开头
+   - 移除 XML 角括号
+
+2. **P0 - TDD 豁免缺失**
+   - 添加 tdd 字段和 waiver_reason
+   - 说明具体原因和日期
+
+3. **P1 - CSO Description 不规范**
+   - 重写为纯触发条件
+   - 移除功能描述部分
+   - 优化触发词覆盖
+
+4. **P1 - 层级违规**
+   - 扁平化目录结构
+   - 将深层内容移至 references/
+   - 更新引用路径
+
+5. **P2 - 内容质量**
+   - 删除冗余段落
+   - 增强示例实用性
+   - 补充具体 Gotchas
+
+**输出要求**:
+- 输出完整的修复后 SKILL.md 内容
+- 标注每处修改的原因
+- 保持原有结构和风格一致
+- 不改变核心业务逻辑
+```
+
+---
+
+### Agent 3: DevOps Agent — 流水线生成
+
+#### Prompt 模板 (已在 Publisher 中提供，此处为 Processor 特定版本)
+
+```markdown
+## Harness DevOps Agent - Processor Specific
+
+请为 skill-factory processor 的以下场景生成 CI/CD 流水线：
+
+**场景 A: Nightly Full Audit**
+- 每天凌晨 2 点运行全量审计
+- 生成 HTML 报告并上传
+- 分数下降超过 5% 时发送告警
+- 存档历史数据用于趋势分析
+
+**场景 B: PR Quality Gate**
+- 每个 PR 触发增量审计
+- 只检查变更的文件
+- 分数 < 70% 时阻止合并
+- 在 PR 中显示详细评分
+
+**场景 C: Weekly Stocktake Scan**
+- 每周一运行健康扫描
+- 检测冗余/孤岛/退化
+- 生成热力图状态矩阵
+- 自动创建 Issue 跟踪问题
+
+**输出**: 3 个独立的 GitHub Actions YAML 文件
+```
+
+---
+
+### Agent 4: Knowledge Graph Agent — 智能分析
+
+#### 使用场景
+
+```markdown
+## Knowledge Graph Agent Prompt
+
+基于当前项目的所有技能，帮我：
+
+1. **构建技能关系图谱**
+   - 分析各技能的依赖关系
+   - 识别父子技能层级
+   - 绘制调用链路图
+
+2. **检测潜在问题**
+   - 冗余检测: 功能重叠的技能对
+   - 孤岛检测: 从未被引用的技能
+   - 退化检测: 长期未更新的技能
+   - 循环依赖: 相互引用的死循环
+
+3. **生成优化建议**
+   - 推荐合并候选对 (相似度 > 80%)
+   - 推荐拆分候选 (复杂度 > Type 3)
+   - 推荐退役候选 (6个月无更新)
+   - 推荐新建候选 (功能缺口)
+
+**输出格式**: Markdown 表格 + Mermaid 图表
+```
 
 ---
 
@@ -608,6 +908,7 @@ skills/skill-factory-processor/
 | 设计原则 | [../references/design-principles.md](../references/design-principles.md) | 三层铁律 + 四维分类 |
 | 加工策略详情 | [references/strategies.md](references/strategies.md) | 4种策略的具体操作步骤 |
 | 审计标准详情 | [references/audit-criteria.md](references/audit-criteria.md) | 评分细则 + 改进模板 |
+| Test Harness 集成 | [references/harness-integration-guide.md](references/harness-integration-guide.md) | CI/CD集成 + 自动化测试 + Harness.io对接 |
 | 最佳实践导航 | [../references/best-practices.md](../references/best-practices.md) | 项目知识枢纽 |
 
 ---
@@ -627,6 +928,8 @@ skills/skill-factory-processor/
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| **v2.4.0** | 2026-05-30 | **Harness AI Agents 全面对接**: 新增完整的 Harness AI Agents 对接章节（4个Agent: Code Review/CI Autofix/DevOps/Knowledge Graph）；提供详细的 Prompt 模板（7维度审查/自动修复规则/流水线生成/智能分析）；集成 GitHub Actions 自动审查工作流 (skill-auto-review.yml)；实现 PR 质量门禁自动化；升级为 Harness AI Hub 架构；automation_level 设为 full |
+| **v2.3.0** | 2026-05-30 | **新增 Test Harness 集成能力**: 新增 harness-integration-guide.md 参考文档；支持双层测试架构(Smoke Test + SDK Evaluation)；集成 GitHub Actions CI/CD 流水线配置模板；添加 Harness.io AI Agents 对接指南；完善测试场景设计(scenarios.yaml)和验收标准(acceptance-criteria.md)；补充全流程质量门禁配置方案 |
 | **v2.2.0** | 2026-05-27 | **新增 Stocktake 模式**: 三模式工作流（加工+审计+健康扫描）；新增模式三完整章节（4种扫描维度、4步执行流程、热力图状态矩阵、行动建议决策树）；对比表格扩展为三模式对比；触发词新增 stocktake/health scan/skill inventory |
 | **v2.1.0** | 2026-05-27 | **集成 skills-ref CLI**: 审计模式新增双重验证工具链（官方格式验证 + 质量评分审计）；加工模式验证步骤增加 skills-ref 检查；自动化工具章节扩展为双工具说明 |
 | **v2.0.0** | 2026-05-27 | **v2.0 架构重构**: 从旧 processor 重构为双模式协调器（加工+审计）；整合 4 种加工策略；迁移审计脚本到本地 scripts/；新增 references/strategies.md 和 audit-criteria.md；可独立通过 `/processor` 触发 |
