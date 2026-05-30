@@ -1,0 +1,207 @@
+version: 1.0
+skill: skill-factory-publisher
+created_date: "2026-05-30"
+author: skill-factory-publisher
+based_on: "harness-integration-guide.md v1.0"
+
+metadata:
+  total_scenarios: 20
+  should_trigger_count: 10
+  should_not_trigger_count: 10
+  coverage_dimensions:
+    - 措辞变化 (3)
+    - 明确度变化 (3)
+    - 细节程度 (2)
+    - 复杂度变化 (2)
+  special_note: "Publisher 是手动触发型技能 (disable-model-invocation)"
+
+scenarios:
+  # ========== Should-trigger (正例) ==========
+  should_trigger:
+    # 维度 1: 措辞变化 (3个)
+    - id: st-01
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 正式
+      prompt: "发布这个技能的新版本"
+      expected_trigger: true
+      notes: "最标准的发布触发方式"
+      
+    - id: st-02
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 版本管理
+      prompt: "给这个技能打个 tag 并推送"
+      expected_trigger: true
+      
+    - id: st-03
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 退役请求
+      prompt: "废弃这个过时的技能"
+      expected_trigger: true
+
+    # 维度 2: 明确度变化 (3个)
+    - id: st-04
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 直接命名
+      prompt: "用 publisher 发布 v2.0 版本"
+      expected_trigger: true
+      
+    - id: st-05
+      type: should-trigger
+      dimension: 明确度变化
+      variant: CI/CD
+      prompt: "配置自动发布流水线"
+      expected_trigger: true
+      
+    - id: st-06
+      type: should-trigger
+      dimension: 明确度变化
+      variant: Changelog
+      prompt: "生成这次更新的 Changelog"
+      expected_trigger: true
+
+    # 维度 3: 细节程度 (2个)
+    - id: st-07
+      type: should-trigger
+      dimension: 细节程度
+      variant: 简短
+      prompt: "发布技能"
+      expected_trigger: true
+      
+    - id: st-08
+      type: should-trigger
+      dimension: 细节程度
+      variant: 详细上下文
+      prompt: |
+        我已经完成了所有技能的优化工作，
+        现在需要统一发布到 v2.5.0 版本，
+        包括更新 version 字段、生成 changelog、创建 git tag
+      expected_trigger: true
+
+    # 维度 4: 复杂度变化 (2个)
+    - id: st-09
+      type: should-trigger
+      dimension: 复杂度变化
+      variant: 单步请求
+      prompt: "打 tag"
+      expected_trigger: true
+      
+    - id: st-10
+      type: should-trigger
+      dimension: 复杂度变化
+      variant: 批量发布
+      prompt: "一次性发布所有 5 个子技能的新版本"
+      expected_trigger: true
+
+  # ========== Should-not-trigger (负例) ==========
+  should_not_trigger:
+    # 近误类型: 同域不同操作 (3个)
+    - id: snt-01
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 创建请求
+      prompt: "创建一个新的发布版本"
+      expected_trigger: false
+      target_skill: creator
+      notes: "'创建新版本' 可能混淆为创建新技能"
+      
+    - id: snt-02
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 加工请求
+      prompt: "优化发布流程"
+      expected_trigger: false
+      target_skill: processor
+      
+    - id: snt-03
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 合并请求
+      prompt: "合并多个版本的变更"
+      expected_trigger: false
+      target_skill: assembler
+
+    # 近误类型: 同词不同义 (2个)
+    - id: snt-04
+      type: should-not-trigger
+      dimension: 近误: 同词不同义
+      variant: 出版物
+      prompt: "出版这本书的新版本"
+      expected_trigger: false
+      target_skill: null
+      
+    - id: snt-05
+      type: should-not-trigger
+      dimension: 近误: 同词不同义
+      variant: 公告发布
+      prompt: "发布公告通知用户"
+      expected_trigger: false
+      target_skill: null
+
+    # 近误类型: 泛化请求 (2个)
+    - id: snt-06
+      type: should-not-trigger
+      dimension: 近误: 泛化请求
+      variant: 分享内容
+      prompt: "分享我的作品到社区"
+      expected_trigger: false
+      target_skill: null
+      
+    - id: snt-07
+      type: should-not-trigger
+      dimension: 近误: 泛化请求
+      variant: 部署应用
+      prompt: "部署应用到生产环境"
+      expected_trigger: false
+      target_skill: null
+
+    # 近误类型: 边缘情况 (3个)
+    - id: snt-08
+      type: should-not-trigger
+      dimension: 边缘情况
+      variant: 空输入
+      prompt: ""
+      expected_trigger: false
+      target_skill: null
+      
+    - id: snt-09
+      type: should-not-trigger
+      dimension: 边缘情况
+      variant: 未完成状态
+      prompt: "我想发布但还没准备好"
+      expected_trigger: false
+      target_skill: null
+      notes: "意图不明确"
+      
+    - id: snt-10
+      type: should-not-trigger
+      dimension: 边缘情况
+      variant: 查询历史
+      prompt: "查看之前的发布记录"
+      expected_trigger: false
+      target_skill: null
+      notes: "信息查询非发布操作"
+
+---
+# Publisher 特殊说明
+
+## 手动触发特性
+
+Publisher 设置了 `disable-model-invocation: true`：
+- **必须由用户显式调用**（如 `/publisher`）
+- **不会自动被模型触发**
+- **适用于需要人工确认的关键操作**
+
+## CI/CD 集成
+
+Publisher 支持 GitHub Actions 自动发布：
+- 详见 [SKILL.md#CI/CD](../../skills/skill-factory-publisher/SKILL.md)
+
+## 更新日志
+
+| 日期 | 版本 | 变更 |
+|------|------|------|
+| 2026-05-30 | v1.0 | 初始版本：20个场景(10正例+10负例)，针对手动触发特性设计 |

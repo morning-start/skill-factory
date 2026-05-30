@@ -1,0 +1,204 @@
+version: 1.0
+skill: skill-factory-creator
+created_date: "2026-05-30"
+author: skill-factory-creator
+based_on: "test-scenario-guide.md v1.0"
+
+metadata:
+  total_scenarios: 20
+  should_trigger_count: 10
+  should_not_trigger_count: 10
+  coverage_dimensions:
+    - 措辞变化 (3)
+    - 明确度变化 (3)
+    - 细节程度 (2)
+    - 复杂度变化 (2)
+  special_note: "Creator 专注于从零创建新技能，不处理已有技能"
+
+scenarios:
+  # ========== Should-trigger (正例) ==========
+  should_trigger:
+    # 维度 1: 措辞变化 (3个)
+    - id: st-01
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 正式
+      prompt: "请帮我创建一个新的 AI Agent Skill"
+      expected_trigger: true
+      notes: "最标准的触发方式"
+      
+    - id: st-02
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 随意
+      prompt: "建个skill试试"
+      expected_trigger: true
+      
+    - id: st-03
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 错别字
+      prompt: "新建一个skiil文件"
+      expected_trigger: true
+
+    # 维度 2: 明确度变化 (3个)
+    - id: st-04
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 直接命名
+      prompt: "用 creator 创建一个 Type 1 技能"
+      expected_trigger: true
+      
+    - id: st-05
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 间接描述
+      prompt: "我需要一个能帮 Claude 学新能力的工具"
+      expected_trigger: true
+      
+    - id: st-06
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 需求文档
+      prompt: "基于这个需求文档，帮我构建对应的 Agent Skill"
+      expected_trigger: true
+
+    # 维度 3: 细节程度 (2个)
+    - id: st-07
+      type: should-trigger
+      dimension: 细节程度
+      variant: 简短
+      prompt: "创建技能"
+      expected_trigger: true
+      
+    - id: st-08
+      type: should-trigger
+      dimension: 细节程度
+      variant: 详细上下文
+      prompt: |
+        我正在开发一个 DevOps 自动化工具集，
+        需要为其中的 CI/CD 模块创建一个独立的技能，
+        要求支持 GitHub Actions 和 Harness.io 双平台
+      expected_trigger: true
+
+    # 维度 4: 复杂度变化 (2个)
+    - id: st-09
+      type: should-trigger
+      dimension: 复杂度变化
+      variant: 单步请求
+      prompt: "创建技能"
+      expected_trigger: true
+      
+    - id: st-10
+      type: should-trigger
+      dimension: 复杂度变化
+      variant: 多步嵌入链
+      prompt: "先分析这个工具能不能做成 skill，然后创建它，最后运行 TDD 测试"
+      expected_trigger: true
+
+  # ========== Should-not-trigger (负例) ==========
+  should_not_trigger:
+    # 近误类型: 同域不同操作 (3个)
+    - id: snt-01
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 加工请求
+      prompt: "帮我优化一下现有的 skill-factory-processor"
+      expected_trigger: false
+      target_skill: processor
+      notes: "'优化' 应触发 processor 非 creator"
+      
+    - id: snt-02
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 审计请求
+      prompt: "检查这个 SKILL.md 是否符合规范"
+      expected_trigger: false
+      target_skill: processor
+      
+    - id: snt-03
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 发布请求
+      prompt: "发布 creator 的新版本"
+      expected_trigger: false
+      target_skill: publisher
+
+    # 近误类型: 同词不同义 (2个)
+    - id: snt-04
+      type: should-not-trigger
+      dimension: 近误: 同词不同义
+      variant: 脚本请求
+      prompt: "写个 Python 脚本来自动化测试"
+      expected_trigger: false
+      target_skill: null
+      
+    - id: snt-05
+      type: should-not-trigger
+      dimension: 近误: 同词不同义
+      variant: 软件技能
+      prompt: "提升我的 Git 使用技能"
+      expected_trigger: false
+      target_skill: null
+
+    # 近误类型: 泛化请求 (2个)
+    - id: snt-06
+      type: should-not-trigger
+      dimension: 近误: 泛化请求
+      variant: 宽泛优化
+      prompt: "优化我的开发流程"
+      expected_trigger: false
+      target_skill: null
+      
+    - id: snt-07
+      type: should-not-trigger
+      dimension: 近误: 泛化请求
+      variant: 工具链整合
+      prompt: "把这些功能封装成可复用的模块"
+      expected_trigger: false
+      target_skill: assembler
+
+    # 近误类型: 跨技能边界 (2个)
+    - id: snt-08
+      type: should-not-trigger
+      dimension: 近误: 跨技能边界
+      variant: 合并意图
+      prompt: "把 creator 和 processor 合并成一个技能"
+      expected_trigger: false
+      target_skill: assembler
+      
+    - id: snt-09
+      type: should-not-trigger
+      dimension: 近误: 跨技能边界
+      variant: 文档生成
+      prompt: "为现有技能生成使用文档"
+      expected_trigger: false
+      target_skill: null
+
+    # 边缘情况 (1个)
+    - id: snt-10
+      type: should-not-trigger
+      dimension: 边缘情况
+      variant: 空请求
+      prompt: ""
+      expected_trigger: false
+      target_skill: null
+
+---
+# Creator 特殊说明
+
+## Type 1 快速路径
+
+Creator 支持 **Type 1 快速路径**（简化 TDD）：
+- 触发词可包含："快速"、"简单"、"MVP"、"原型"
+
+## Test Scenario 设计
+
+详细的 Scenario 设计规范请查看：
+[references/test-scenario-guide.md](../../skills/skill-factory-creator/references/test-scenario-guide.md)
+
+## 更新日志
+
+| 日期 | 版本 | 变更 |
+|------|------|------|
+| 2026-05-30 | v1.0 | 初始版本：20个场景(10正例+10负例) |

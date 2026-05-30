@@ -1,0 +1,223 @@
+version: 1.0
+skill: skill-factory
+created_date: "2026-05-30"
+author: skill-factory
+based_on: "harness-integration-guide.md v1.0"
+
+metadata:
+  total_scenarios: 20
+  should_trigger_count: 10
+  should_not_trigger_count: 10
+  coverage_dimensions:
+    - 措辞变化 (3)
+    - 明确度变化 (3)
+    - 细节程度 (2)
+    - 复杂度变化 (2)
+  special_note: "Router Pattern - 仅做请求分发，不执行具体操作"
+
+scenarios:
+  # ========== Should-trigger (正例) ==========
+  should_trigger:
+    # 维度 1: 措辞变化 (3个)
+    - id: st-01
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 正式
+      prompt: "使用 skill-factory 创建一个新技能"
+      expected_trigger: true
+      notes: "标准触发方式：明确提到 skill-factory"
+      
+    - id: st-02
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 随意
+      prompt: "用 skill factory 帮我优化这个技能"
+      expected_trigger: true
+      notes: "随意措辞 + 空格变体"
+      
+    - id: st-03
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 子技能触发
+      prompt: "调用 /processor 审计一下项目"
+      expected_trigger: true
+      notes: "直接调用子技能也应触发路由器"
+
+    # 维度 2: 明确度变化 (3个)
+    - id: st-04
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 多步骤复合
+      prompt: "先用 creator 创建技能，然后用 processor 审计，最后 publisher 发布"
+      expected_trigger: true
+      notes: "多子技能组合场景"
+      
+    - id: st-05
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 模糊意图
+      prompt: "我需要管理我的 AI Agent 技能"
+      expected_trigger: true
+      notes: "模糊但属于 skill-factory 职责范围"
+      
+    - id: st-06
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 版本查询
+      prompt: "skill-factory 的最新版本是什么？有哪些功能？"
+      expected_trigger: true
+      notes: "信息查询类请求"
+
+    # 维度 3: 细节程度 (2个)
+    - id: st-07
+      type: should-trigger
+      dimension: 细节程度
+      variant: 简短
+      prompt: "skill factory"
+      expected_trigger: true
+      
+    - id: st-08
+      type: should-trigger
+      dimension: 细节程度
+      variant: 详细上下文
+      prompt: |
+        我正在开发一个 AI Agent 技能管理系统，
+        听说有个叫 skill-factory 的工具可以帮忙，
+        请介绍一下它的功能和使用方法
+      expected_trigger: true
+
+    # 维度 4: 复杂度变化 (2个)
+    - id: st-09
+      type: should-trigger
+      dimension: 复杂度变化
+      variant: 单步请求
+      prompt: "打开 skill-factory"
+      expected_trigger: true
+      
+    - id: st-10
+      type: should-trigger
+      dimension: 复杂度变化
+      variant: 问题诊断
+      prompt: |
+        我的技能审计分数只有 70 分，
+        用 skill-factory 帮我分析问题并制定改进计划
+      expected_trigger: true
+
+  # ========== Should-not-trigger (负例) ==========
+  should_not_trigger:
+    # 近误类型: 同域不同操作 (3个)
+    - id: snt-01
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 直接调用子技能
+      prompt: "/creator 创建一个新技能"
+      expected_trigger: false
+      target_skill: creator
+      notes: "直接调用子技能应绕过路由器（或路由器仍可识别）"
+      
+    - id: snt-02
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 其他工具名称
+      prompt: "使用 skill-builder 构建新技能"
+      expected_trigger: false
+      target_skill: null
+      notes: "'skill-builder' 不是 'skill-factory'"
+      
+    - id: snt-03
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 泛化请求
+      prompt: "帮我创建一个 AI Agent"
+      expected_trigger: false
+      target_skill: creator
+      notes: "未提及 skill-factory，应触发 creator"
+
+    # 近误类型: 同词不同义 (2个)
+    - id: snt-04
+      type: should-not-trigger
+      dimension: 近误: 同词不同义
+      variant: 工厂模式
+      prompt: "使用工厂模式设计这个类"
+      expected_trigger: false
+      target_skill: null
+      notes: "'factory' 在此指设计模式非 skill-factory 工具"
+      
+    - id: snt-05
+      type: should-not-trigger
+      dimension: 近误: 同词不同义
+      variant: 技能培训
+      prompt: "提升我的职业技能"
+      expected_trigger: false
+      target_skill: null
+      notes: "'skill' 在此指职业能力非 Agent Skill"
+
+    # 近误类型: 泛化请求 (2个)
+    - id: snt-06
+      type: should-not-trigger
+      dimension: 近误: 泛化请求
+      variant: 项目管理
+      prompt: "帮我管理这个项目的文档"
+      expected_trigger: false
+      target_skill: null
+      notes: "太宽泛，不特指技能管理"
+      
+    - id: snt-07
+      type: should-not-trigger
+      dimension: 近误: 泛化请求
+      variant: 开发工具链
+      prompt: "搭建一套完整的开发工具链"
+      expected_trigger: false
+      target_skill: null
+      notes: "通用开发需求非 skill-factory 特定"
+
+    # 近误类型: 边缘情况 (3个)
+    - id: snt-08
+      type: should-not-trigger
+      dimension: 边缘情况
+      variant: 空输入
+      prompt: ""
+      expected_trigger: false
+      target_skill: null
+      notes: "空输入不应触发"
+      
+    - id: snt-09
+      type: should-not-trigger
+      dimension: 边缘情况
+      variant: 无关技术
+      prompt: "今天天气怎么样？"
+      expected_trigger: false
+      target_skill: null
+      notes: "完全无关的请求"
+      
+    - id: snt-10
+      type: should-not-trigger
+      dimension: 边缘情况
+      variant: 其他框架
+      prompt: "使用 LangChain 创建 Agent"
+      expected_trigger: false
+      target_skill: null
+      notes: "其他 AI 框架非 skill-factory"
+
+---
+# Router 特殊说明
+
+## 触发特点
+
+作为 **Router Pattern** 技能，skill-factory 的触发行为特殊：
+
+1. **总是被触发**: 当用户提到任何与技能生命周期相关的操作时
+2. **分发而非执行**: 触发后立即将请求转发到对应的子技能
+3. **透明代理**: 用户可能不知道路由器的存在
+
+## 测试建议
+
+由于 Router 特性，建议：
+- 正例测试重点验证**路由准确性**（是否分发到正确的子技能）
+- 负例测试重点验证**不干扰**其他技能的触发
+
+## 更新日志
+
+| 日期 | 版本 | 变更 |
+|------|------|------|
+| 2026-05-30 | v1.0 | 初始版本：20个场景(10正例+10负例)，针对 Router Pattern 设计 |

@@ -1,0 +1,204 @@
+version: 1.0
+skill: skill-factory-assembler
+created_date: "2026-05-30"
+author: skill-factory-assembler
+based_on: "harness-integration-guide.md v1.0"
+
+metadata:
+  total_scenarios: 20
+  should_trigger_count: 10
+  should_not_trigger_count: 10
+  coverage_dimensions:
+    - 措辞变化 (3)
+    - 明确度变化 (3)
+    - 细节程度 (2)
+    - 复杂度变化 (2)
+  special_note: "Assembler 专注于多技能合并/拆分操作"
+
+scenarios:
+  # ========== Should-trigger (正例) ==========
+  should_trigger:
+    # 维度 1: 措辞变化 (3个)
+    - id: st-01
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 正式
+      prompt: "合并这两个技能为一个"
+      expected_trigger: true
+      notes: "最标准的合并触发方式"
+      
+    - id: st-02
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 随意
+      prompt: "把这几个技能整合一下"
+      expected_trigger: true
+      
+    - id: st-03
+      type: should-trigger
+      dimension: 措辞变化
+      variant: 拆分请求
+      prompt: "把这个大技能拆分成两个小的"
+      expected_trigger: true
+
+    # 维度 2: 明确度变化 (3个)
+    - id: st-04
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 直接命名
+      prompt: "用 assembler 合并 creator 和 processor"
+      expected_trigger: true
+      
+    - id: st-05
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 重构意图
+      prompt: "重新组织这些技能的架构结构"
+      expected_trigger: true
+      
+    - id: st-06
+      type: should-trigger
+      dimension: 明确度变化
+      variant: 批量操作
+      prompt: "批量处理这 5 个技能的合并"
+      expected_trigger: true
+
+    # 维度 3: 细节程度 (2个)
+    - id: st-07
+      type: should-trigger
+      dimension: 细节程度
+      variant: 简短
+      prompt: "合并技能"
+      expected_trigger: true
+      
+    - id: st-08
+      type: should-trigger
+      dimension: 细节程度
+      variant: 详细上下文
+      prompt: |
+        我发现 skill-a 和 skill-b 有 80% 功能重叠，
+        请帮我将它们合并成一个统一的技能，
+        保留两者的优点并消除冗余
+      expected_trigger: true
+
+    # 维度 4: 复杂度变化 (2个)
+    - id: st-09
+      type: should-trigger
+      dimension: 复杂度变化
+      variant: 单步请求
+      prompt: "拆分这个复杂技能"
+      expected_trigger: true
+      
+    - id: st-10
+      type: should-trigger
+      dimension: 复杂度变化
+      variant: 嵌套模式
+      prompt: "先合并 A 和 B，再拆分 C，最后验证所有依赖关系"
+      expected_trigger: true
+
+  # ========== Should-not-trigger (负例) ==========
+  should_not_trigger:
+    # 近误类型: 同域不同操作 (3个)
+    - id: snt-01
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 创建请求
+      prompt: "创建一个新的组合技能"
+      expected_trigger: false
+      target_skill: creator
+      notes: "'创建' 应触发 creator 非 assembler"
+      
+    - id: snt-02
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 加工请求
+      prompt: "优化合并后的技能质量"
+      expected_trigger: false
+      target_skill: processor
+      
+    - id: snt-03
+      type: should-not-trigger
+      dimension: 近误: 同域不同操作
+      variant: 发布请求
+      prompt: "发布重组后的新版本"
+      expected_trigger: false
+      target_skill: publisher
+
+    # 近误类型: 同词不同义 (2个)
+    - id: snt-04
+      type: should-not-trigger
+      dimension: 近误: 同词不同义
+      variant: 组装硬件
+      prompt: "组装这台电脑的硬件配置"
+      expected_trigger: false
+      target_skill: null
+      
+    - id: snt-05
+      type: should-not-trigger
+      dimension: 近误: 同词不同义
+      variant: 代码集成
+      prompt: "集成这两个 API 服务"
+      expected_trigger: false
+      target_skill: null
+
+    # 近误类型: 泛化请求 (2个)
+    - id: snt-06
+      type: should-not-trigger
+      dimension: 近误: 泛化请求
+      variant: 整理文件
+      prompt: "整理一下项目目录结构"
+      expected_trigger: false
+      target_skill: null
+      
+    - id: snt-07
+      type: should-not-trigger
+      dimension: 近误: 泛化请求
+      variant: 重构代码
+      prompt: "重构这个模块的代码"
+      expected_trigger: false
+      target_skill: null
+
+    # 近误类型: 边缘情况 (3个)
+    - id: snt-08
+      type: should-not-trigger
+      dimension: 边缘情况
+      variant: 空输入
+      prompt: ""
+      expected_trigger: false
+      target_skill: null
+      
+    - id: snt-09
+      type: should-not-trigger
+      dimension: 边缘情况
+      variant: 单一技能
+      prompt: "只处理这一个技能"
+      expected_trigger: false
+      target_skill: processor
+      notes: "单一技能应触发 processor"
+      
+    - id: snt-10
+      type: should-not-trigger
+      dimension: 边缘情况
+      variant: 审计请求
+      prompt: "检查合并后的结果是否符合规范"
+      expected_trigger: false
+      target_skill: processor
+
+---
+# Assembler 特殊说明
+
+## 批量验证支持
+
+Assembler 支持合并/拆分后的**批量验证**：
+- 自动运行全量审计 (`audit.ps1 -Project`)
+- 触发 Stocktake 健康扫描
+- 生成验证报告
+
+详细流程请查看：
+[SKILL.md#批量验证](../../skills/skill-factory-assembler/SKILL.md)
+
+## 更新日志
+
+| 日期 | 版本 | 变更 |
+|------|------|------|
+| 2026-05-30 | v1.0 | 初始版本：20个场景(10正例+10负例) |
