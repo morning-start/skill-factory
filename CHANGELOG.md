@@ -7,6 +7,161 @@ and this project adheres to [Semantic Versioning](https://semver.org/lang/zh-CN/
 
 ---
 
+## [v2.2.0] - 2026-05-30
+
+### 🎯 TDD 验证记录全面增强
+
+为 Publisher 和根路由器添加明确的 TDD 引用，实现全技能栈 TDD 完美覆盖。
+
+#### ✨ 核心变更
+
+- 🎉 **Publisher TDD 增强** (v2.2.1 → v2.3.0):
+  - 新增 `📋 TDD 验证记录` 章节
+  - 明确引用 scenarios.yaml（20 个压力测试场景）
+  - 引用 harness-integration-guide.md（CI/CD 流水线验证）
+  - 引用 GitHub Actions 质量门禁（≥85%）
+  - **TDD 分数**: 10/15 → **15/15** ✅
+
+- 🎉 **根路由器 TDD 增强** (v2.1.0 → v2.2.0):
+  - 新增 `📋 TDD 验证记录` 章节（Router Pattern Validation 策略）
+  - 引用 root scenarios.yaml（20 个路由决策场景）
+  - 级联引用 4 个子技能的 scenarios.yaml（共 100 场景）
+  - 引用 routing-engine.md 设计文档
+  - **TDD 分数**: 10/15 → **15/15** ✅
+
+#### 📊 审计结果
+
+| 技能 | 总分 | 百分比 | TDD |
+|------|------|--------|-----|
+| 根路由器 | 69/70 | **99%** | 15/15 ✅ |
+| Assembler | 67/70 | 96% | 15/15 ✅ |
+| Publisher | 66/70 | 94% | 15/15 ✅ |
+| Processor | 66/70 | 94% | 15/15 ✅ |
+| Creator | 65/70 | 93% | 15/15 ✅ |
+| **项目平均** | - | **95%** | **100% 完美覆盖** |
+
+---
+
+## [v2.1.0] - 2026-05-30
+
+### 🔬 Test Harness 集成 + 质量提升
+
+基于 Harness.io 框架，为项目引入完整的测试基础设施和 CI/CD 能力。
+
+#### ✨ Test Harness 全面集成
+
+- 🧪 **5 个 scenarios.yaml 文件**（每个技能 20 个场景，共 100 个）:
+  - skill-factory-root: Router Pattern 决策场景
+  - skill-factory-creator: 创建流程场景
+  - skill-factory-processor: 审计策略场景
+  - skill-factory-publisher: 发布/退役场景
+  - skill-factory-assembler: 合并/拆分场景
+
+- 🔧 **audit.ps1 v1.2 增强**:
+  - 支持 reference-style TDD 记录检测（`[references/tdd-guide.md]` 格式）
+  - CSO 描述容忍 "Triggers include/on/when" 触发关键字格式
+  - Windows 路径解析修复（forward slash 兼容）
+
+- 🔧 **audit.ps1 v1.3 进一步优化**:
+  - 多候选路径解析算法（3 种路径变体 + 双重验证）
+  - 解决 Creator 9 个死链误报问题
+
+#### 📦 Processor 精简重构
+
+- **936 行 → 574 行** (-38.7%)
+- 提取 `references/harness-agents-guide.md` (~295 行):
+  - Code Review Agent Prompt 模板
+  - CI Autofix Agent Prompt 模板
+  - DevOps Agent Prompt 模板
+  - Knowledge Graph Agent Prompt 模板
+  - GitHub Actions 配置示例
+
+#### 📈 项目质量提升
+
+| 维度 | v2.0.0 | v2.1.0 | 变化 |
+|------|--------|--------|------|
+| 项目平均分 | ~88% | **93%** | +5% |
+| TDD 完美率 | 60% | **80%** | +20% |
+| 测试场景数 | 20 | **100** | +400% |
+| references/ 文件 | 8 | **12** | +4 |
+
+---
+
+## [v2.0.0] - 2026-05-27
+
+### 🏗️ 4-Entry Router 架构重构（重大变更）
+
+从统一工坊模式升级为轻量路由器 + 4 个独立子技能的现代架构。
+
+#### 🔄 架构变革
+
+- 📐 **4-Entry Router Pattern**:
+  ```
+  用户请求 → SKILL.md (Router) → skills/{sub-skill}/SKILL.md
+  ```
+
+- 📦 **4 个独立子技能**（完全自含）:
+  | 子技能 | 职责 | 版本 | 特殊属性 |
+  |--------|------|------|---------|
+  | **creator** | 创建新技能 | v2.x | TDD 流程 + 类型判定 |
+  | **processor** | 加工+审计已有技能 | v2.x | audit.ps1 + 4 种策略 |
+  | **publisher** | 发布+退役 | v2.x | 手动触发 (`disable-model-invocation`) |
+  | **assembler** | 合并+拆分 | v2.x | 序列/并行/嵌套模式 |
+
+#### ✨ 核心新增能力
+
+- 🎯 **智能路由引擎**:
+  - 基于用户意图关键词自动分发
+  - 复合场景支持（创建→发布、优化→发布、拆分→逐一发布）
+  - 歧义处理机制（选项菜单）
+
+- 📋 **完整 references/ 体系**:
+  - `design-principles.md` — 铁律 + 四维分类 + 三级加载系统
+  - `best-practices.md` — 最佳实践速查
+  - `writing-rules.md` — R1-R14 写作规则
+  - `routing-engine.md` — 路由引擎详细设计
+
+- ⚙️ **Processor 审计引擎**:
+  - `scripts/audit.ps1` — 100 分制质量评分（7 维度）
+  - Front Matter / CSO / TDD / Sections / Layer / Naming / Links
+  - HTML 报告生成 + 项目级汇总
+
+- 📤 **Publisher CI/CD 集成**:
+  - GitHub Actions 自动发布工作流
+  - 发布前质量门禁（≥85%）
+  - 自动 Changelog 生成
+  - Git Tag + Release 自动化
+
+#### 📊 架构对比
+
+| 维度 | v0.6.0 (旧版) | v2.0.0 (新版) | 变化 |
+|------|--------------|---------------|------|
+| 架构模式 | 统一工坊 | **4-Entry Router** | 现代化 |
+| 入口文件行数 | ~800 行 | **~150 行** | -81% |
+| 子技能数 | 3 | **4** | +1 (新增 processor) |
+| 审计能力 | 无 | **audit.ps1 (7 维度)** | 全新 |
+| 测试场景 | 无 | **100 场景** | 全新 |
+| CI/CD | 无 | **GitHub Actions** | 全新 |
+| 技能独立性 | 耦合 | **完全自含** | 解耦 |
+
+#### 🎨 设计哲学升级
+
+- 从"工坊操作系统"转变为"**轻量路由枢纽**"
+- 从"必须学习元系统"转变为"**智能分发 + 即用即查**"
+- 从"单一入口处理所有"转变为"**职责分离 + 专业子技能**"
+
+### 📝 迁移指南
+
+从 v0.6.0 升级到 v2.0.0 的关键变化：
+
+1. ✅ **路由器替代统一入口**: 所有请求通过 SKILL.md 路由到对应子技能
+2. ✅ **Processor 新增**: 审计功能从 creator 独立出来
+3. ✅ **Publisher 手动触发**: 发布操作需 `/publisher` 显式调用
+4. ✅ **references/ 扩充**: 新增 routing-engine.md 和 best-practices.md
+5. ✅ **TDD 强制化**: 所有技能必须有 TDD 记录或豁免说明
+
+---
+
 ## [v0.6.0] - 2026-05-24
 
 ### 🔄 Superpowers 方法论融合（重大升级）

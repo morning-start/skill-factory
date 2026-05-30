@@ -1,7 +1,7 @@
-# Skill Factory v6.0 — 技能工坊 (TDD Edition)
+# Skill Factory v2.2 — 技能工坊 (Router Edition)
 
 <p align="center">
-  <strong>AI Agent 技能创建工坊 | TDD 驱动方法论 | CSO 优化</strong>
+  <strong>AI Agent 技能创建工坊 | 4-Entry Router 架构 | TDD 驱动 | CI/CD 集成</strong>
 </p>
 
 <p align="center">
@@ -11,6 +11,13 @@
   <a href="#-使用指南">使用指南</a> •
   <a href="#-设计原则">设计原则</a> •
   <a href="#-版本历史">版本历史</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Project_Average-95%25-brightgreen" alt="95% Score" />
+  <img src="https://img.shields.io/badge/TDD_Coverage-100%25-success" alt="TDD 100%" />
+  <img src="https://img.shields.io/badge/Test_Scenarios-100-blue" alt="100 Scenarios" />
+  <img src="https://img.shields.io/badge/Architecture-4_Entry_Router-informational" alt="Router" />
 </p>
 
 ---
@@ -23,11 +30,14 @@
 
 | 特性 | 说明 |
 |------|------|
-| **🔄 TDD 驱动创建** | 先观察 Agent 失败，再编写技能，用子代理压力测试验证效果 |
+| **🔄 4-Entry Router 架构** | 轻量路由枢纽 + 4 个独立子技能（creator/processor/publisher/assembler） |
+| **🔬 TDD 驱动创建** | 先观察 Agent 失败，再编写技能，用压力测试场景验证效果 |
 | **⚖️ 三层架构铁律** | 所有技能层级必须 ≤3 层，不可妥协的设计约束 |
 | **🔬 CSO 发现优化** | description 只写触发条件，不写工作流，防止 Agent 走捷径 |
 | **🗂️ 四维分类法** | 轻/重 × 薄/厚，精准判定技能体型和结构 |
-| **✅ 质量标准体系** | 100 分评分体系 + 8 项规范检查清单 |
+| **✅ 质量标准体系** | 100 分制审计评分（7 维度）+ HTML 报告生成 |
+| **🧪 Test Harness** | 100 个压力测试场景（每个技能 20 个），should-trigger/should-not-trigger |
+| **🚀 CI/CD 集成** | GitHub Actions 自动发布流水线 + 发布前质量门禁（≥85%） |
 
 ### 🎯 解决的痛点
 
@@ -148,13 +158,14 @@ description: "Use when executing implementation plans with independent tasks"
 
 | 需求 | 场景 | 详见 |
 |------|------|------|
-| "帮我创建技能" | 创建+加工指南 | [creator](skills/skill-factory-creator/SKILL.md) |
-| "优化已有技能" | 加工模式 | [creator](skills/skill-factory-creator/SKILL.md) |
-| "合并/拆分技能" | 合并+拆分指南 | [assembler](skills/skill-factory-assembler/SKILL.md) |
-| "发布新版本" | 发布流程 | [publisher](skills/skill-factory-publisher/SKILL.md) |
-| "退役旧技能" | 销毁流程 | [publisher](skills/skill-factory-publisher/SKILL.md) |
-| "检查是否规范" | 标准清单 | [references/skill-standards.md](references/skill-standards.md) |
+| "帮我创建技能" | 创建新技能 | [creator](skills/skill-factory-creator/SKILL.md) |
+| "优化/精简/改进技能" | 加工已有技能 | [processor](skills/skill-factory-processor/SKILL.md) |
+| "检查/审计/评分" | 审计技能质量 | [processor](skills/skill-factory-processor/SKILL.md) |
+| "合并/拆分技能" | 多技能操作 | [assembler](skills/skill-factory-assembler/SKILL.md) |
+| "发布新版本" | 版本发布 | [publisher](skills/skill-factory-publisher/SKILL.md) |
+| "退役旧技能" | 技能退役 | [publisher](skills/skill-factory-publisher/SKILL.md) |
 | "怎么写出好内容" | 写作规则 | [references/writing-rules.md](references/writing-rules.md) |
+| "运行全量审计" | 项目级检查 | `./skills/skill-factory-processor/scripts/audit.ps1 -Project` |
 
 ### 示例：创建一个"代码审查"技能
 
@@ -200,18 +211,37 @@ dependency:
 
 ```
 skill-factory/
-├── SKILL.md                              ← 入口文件（本文件）
+├── SKILL.md                              ← 入口文件（路由器 ~150行）
 ├── metadata.json                         ← 元数据
 ├── README.md                             ← 项目说明
 ├── CHANGELOG.md                          ← 变更日志
-├── references/                           ← 参考文档（不占层级）
-│   ├── design-principles.md              ← 铁律 + 四维分类 + 设计模式
-│   ├── skill-standards.md                ← 规范检查完整清单
-│   └── writing-rules.md                  ← 写作高级规则 (Gotchas/反模式/验证循环)
-└── skills/                               ← Layer 1: 阶段指南
-    ├── skill-factory-creator/SKILL.md    ← 创建器（生产+加工）
-    ├── skill-factory-publisher/SKILL.md  ← 发布器（发布+销毁）
-    └── skill-factory-assembler/SKILL.md  ← 整合器（合并+拆分）
+├── references/                           ← 全局参考文档（不占层级）
+│   ├── design-principles.md              ← 铁律 + 四维分类 + 三级加载系统
+│   ├── best-practices.md                 ← 最佳实践速查
+│   ├── writing-rules.md                  ← 写作高级规则 (R1-R14)
+│   └── routing-engine.md                 ← 路由引擎详细设计
+├── skills/                               ← Layer 1: 4 个独立子技能
+│   ├── skill-factory-creator/            ← 📦 创建器 (TDD流程+类型判定)
+│   │   ├── SKILL.md                      ← 协调器 (~575行)
+│   │   ├── references/                   ← test-scenario-guide.md
+│   │   └── scripts/                      ← 辅助脚本
+│   ├── skill-factory-processor/          ← ⚙️ 加工器+审计引擎
+│   │   ├── SKILL.md                      ← 协调器 (~574行)
+│   │   ├── references/                   ← harness-agents-guide.md, harness-integration-guide.md
+│   │   └── scripts/
+│   │       └── audit.ps1                 ← 100分制审计脚本 (v1.3)
+│   ├── skill-factory-publisher/          ← 📤 发布器 (手动触发)
+│   │   ├── SKILL.md                      ← 协调器 (~468行)
+│   │   └── references/                   ← semver/git-commit/changelog/deprecation
+│   └── skill-factory-assembler/           ← 🔗 整合器 (合并+拆分)
+│       ├── SKILL.md                      ← 协调器 (~387行)
+│       └── references/                   ← 合并/拆分策略
+└── tests/scenarios/                      ← Test Harness (100个场景)
+    ├── skill-factory-root/scenarios.yaml
+    ├── skill-factory-creator/scenarios.yaml
+    ├── skill-factory-processor/scenarios.yaml
+    ├── skill-factory-publisher/scenarios.yaml
+    └── skill-factory-assembler/scenarios.yaml
 ```
 
 ### 通用技能目录约定
@@ -330,11 +360,13 @@ dependency:
 
 | 版本 | 日期 | 主要变更 |
 |------|------|---------|
-| **v0.6.0** | 2026-05-24 | 🔄 **Superpowers融合**：新增TDD驱动创建、CSO优化、子代理压力测试、复杂度分级；description改用Use when格式 |
-| **v0.5.0** | 2026-05-16 | ✍️ **写作规则模块**：新增 writing-rules.md (7项高级规则)，设计模式 7→11 |
-| **v0.4.1** | 2026-05-16 | 📚 **质量审计**：修复 13 个问题 (P0-P2)，旧术语清零 |
-| **v0.4.0** | 2026-05-16 | 🔧 **工坊重构**：18文件→6文件，6,000行→~800行，工厂→工坊 |
-| v0.3.1 | 2026-05-01 | 📦 Type 3 拆分：主文件精简至 225 行 |
+| **v2.2.0** | 2026-05-30 | 🎯 **TDD 全面增强**: Publisher + 根路由器 TDD 15/15 完美覆盖；项目平均 **95% (A-grade)**；100% TDD 覆盖率 |
+| **v2.1.0** | 2026-05-30 | 🔬 **Test Harness 集成**: 100 个测试场景（5 技能 × 20 场景）；audit.ps1 v1.2-v1.3 增强；Processor 精简至 574 行 (-38.7%) |
+| **v2.0.0** | 2026-05-27 | 🏗️ **4-Entry Router 架构**: 从统一工坊升级为轻量路由器 + 4 独立子技能；新增 processor（审计引擎）；CI/CD 集成 |
+| **v0.6.0** | 2026-05-24 | 🔄 **Superpowers融合**: TDD驱动创建、CSO优化、子代理压力测试、复杂度分级 |
+| **v0.5.0** | 2026-05-16 | ✍️ **写作规则模块**: writing-rules.md (7项高级规则)，设计模式 7→11 |
+| **v0.4.1** | 2026-05-16 | 📚 **质量审计**: 修复 13 个问题 (P0-P2)，旧术语清零 |
+| **v0.4.0** | 2026-05-16 | 🔧 **工坊重构**: 18文件→6文件，6,000行→~800行 |
 | v0.3.0 | 2026-05-01 | ⚖️ 三层架构铁律内化 |
 | v0.2.0 | 2026-05-01 | 🏗️ 三层架构重构 |
 | v0.1.0 | 2026-04-XX | 🎉 初始版本 |
@@ -359,9 +391,17 @@ dependency:
 
 | 指南 | 职责 | 路径 |
 |------|------|------|
-| **Creator** | 创建器（生产+加工） | [skills/skill-factory-creator/SKILL.md](skills/skill-factory-creator/SKILL.md) |
-| **Publisher** | 发布器（发布+销毁） | [skills/skill-factory-publisher/SKILL.md](skills/skill-factory-publisher/SKILL.md) |
-| **Assembler** | 整合器（合并+拆分） | [skills/skill-factory-assembler/SKILL.md](skills/skill-factory-assembler/SKILL.md) |
+| **Creator** | 创建器（TDD 流程 + 类型判定） | [skills/skill-factory-creator/SKILL.md](skills/skill-factory-creator/SKILL.md) |
+| **Processor** | 加工器 + 审计引擎（4 种策略 + audit.ps1） | [skills/skill-factory-processor/SKILL.md](skills/skill-factory-processor/SKILL.md) |
+| **Publisher** | 发布器 + 退役（手动触发） | [skills/skill-factory-publisher/SKILL.md](skills/skill-factory-publisher/SKILL.md) |
+| **Assembler** | 整合器（合并 + 拆分） | [skills/skill-factory-assembler/SKILL.md](skills/skill-factory-assembler/SKILL.md) |
+
+### 审计工具
+
+| 工具 | 说明 | 用法 |
+|------|------|------|
+| **audit.ps1** | 100 分制质量审计脚本 (v1.3) | `./skills/skill-factory-processor/scripts/audit.ps1 -Project -Verbose` |
+| **HTML 报告** | 可视化审计报告生成 | 添加 `-Html` 参数 |
 
 ---
 
