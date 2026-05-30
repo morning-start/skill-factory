@@ -80,7 +80,15 @@ function Test-CSODescription {
     }
     
     $badPatterns = 'workflow', 'steps', 'execute', 'process', 'help guide', 'provides'
-    $hasWorkflowSummary = $badPatterns | Where-Object { $desc -match [regex]::Escape($_) }
+    
+    $hasTriggersKeyword = $desc -match '(?i)triggers\s+(on|include|when)'
+    if ($hasTriggersKeyword) {
+        $cleanDesc = $desc -replace '(?i)\.?\s*triggers\s+(on|include|when).*$', ''
+        $hasWorkflowSummary = $badPatterns | Where-Object { $cleanDesc -match [regex]::Escape($_) }
+    } else {
+        $hasWorkflowSummary = $badPatterns | Where-Object { $desc -match [regex]::Escape($_) }
+    }
+
     if (-not $hasWorkflowSummary) { $score += 5 } else {
         $issues += "Description contains workflow summary (Agent may skip body)"
     }
