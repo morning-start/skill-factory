@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
-    Skill Factory Automated Audit Script v1.2
+    Skill Factory Automated Audit Script v1.3
 .DESCRIPTION
     Audits SKILL.md files against the 100-point quality scoring system.
     Based on skill-factory v0.8.0 standards (CSO, TDD, layer compliance, etc.)
-    v1.2: Fixed Windows path resolution, enhanced CSO/TDD detection rules
+    v1.3: Enhanced multi-candidate link resolution for Windows compatibility
 .PARAMETER Path
     SKILL.md file path to audit (default: ./SKILL.md)
 .PARAMETER Project
@@ -195,14 +195,38 @@ function Test-LinksValid {
 
     foreach ($link in $links) {
         try {
-            $normalizedLink = $link -replace '/', [System.IO.Path]::DirectorySeparatorChar
-            $fullTarget = [System.IO.Path]::GetFullPath((Join-Path $baseDir $normalizedLink))
+            $candidates = @()
             
-            if (-not (Test-Path $fullTarget)) {
-                $altTarget = $fullTarget -replace '\\', '/'
-                if (-not (Test-Path $altTarget)) {
-                    $broken++
-                }
+            $normalizedLink = $link -replace '/', [System.IO.Path]::DirectorySeparatorChar
+            $candidate1 = Join-Path $baseDir $normalizedLink
+            
+            $unixStyleLink = $link -replace '\\', '/'
+            $candidate2 = Join-Path $baseDir $unixStyleLink
+            
+            $noDotSlashLink = $link -replace '^\./', ''
+            $candidate3 = Join-Path $baseDir $noDotSlashLink
+            
+            $candidates += @( $candidate1, $candidate2, $candidate3 ) | Select-Object -Unique
+            
+            $found = $false
+            foreach ($candidate in $candidates) {
+                try {
+                    $fullPath = [System.IO.Path]::GetFullPath($candidate)
+                    if (Test-Path $fullPath) {
+                        $found = $true
+                        break
+                    }
+                    
+                    $resolved = Resolve-Path $candidate -ErrorAction SilentlyContinue
+                    if ($resolved) {
+                        $found = $true
+                        break
+                    }
+                } catch { }
+            }
+            
+            if (-not $found) {
+                $broken++
             }
         } catch {
             $broken++
