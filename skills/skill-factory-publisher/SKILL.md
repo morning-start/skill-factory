@@ -2,7 +2,7 @@
 name: skill-factory-publisher
 version: v2.3.0
 author: skill-factory
-description: Use when publishing, releasing, versioning, tagging, retiring AI Agent skills, generating changelogs, or managing skill lifecycle. Triggers include: publish skill, release skill, version bump, git tag, deprecate skill, retire skill, automated release, CI/CD pipeline, GitHub Actions workflow, changelog generation, skill deprecation
+description: "Use when publishing, releasing, versioning, tagging, retiring AI Agent skills, generating changelogs, or managing skill lifecycle. Triggers include: publish skill, release skill, version bump, git tag, deprecate skill, retire skill, automated release, CI/CD pipeline, GitHub Actions workflow, changelog generation, skill deprecation"
 tags: [skill-publishing, version-management, git-workflow, deprecation, skill-lifecycle, ci-cd-integration, automation, skill-factory]
 dependency:
   parent: skill-factory
