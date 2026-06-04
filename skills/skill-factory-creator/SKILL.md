@@ -2,7 +2,7 @@
 name: skill-factory-creator
 version: v2.4.0
 author: skill-factory
-description: Use when creating new AI Agent skills from scratch, writing SKILL.md files, starting skill development with TDD, designing test scenarios (scenarios.yaml), or defining acceptance criteria. Triggers on "create a skill", "new skill", "write SKILL.md", "from zero", "build a skill", "skill creation", "TDD for skills", "start a new agent skill", "test scenario", "acceptance criteria", or "harness testing"
+description: "Use when creating new AI Agent skills from scratch, writing SKILL.md files, starting skill development with TDD, designing test scenarios (scenarios.yaml), or defining acceptance criteria. Triggers on \"create a skill\", \"new skill\", \"write SKILL.md\", \"from zero\", \"build a skill\", \"skill creation\", \"TDD for skills\", \"start a new agent skill\", \"test scenario\", \"acceptance criteria\", or \"harness testing\""
 tags: [skill-creation, tdd-driven, test-scenarios, acceptance-criteria, harness-testing, type-classification, template-selection, ci-cd-ready, skill-factory]
 dependency:
   parent: skill-factory

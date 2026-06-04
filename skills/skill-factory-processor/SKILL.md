@@ -2,7 +2,7 @@
 name: skill-factory-processor
 version: v2.5.0
 author: skill-factory
-description: Use when optimizing, refining, improving, auditing, validating, checking AI Agent skills for quality and compliance, performing health stocktake scans, or integrating Harness AI Agents for automated quality management. Triggers on "optimize this skill", "improve skill", "audit skill", "check compliance", "skill quality", "validate SKILL.md", "refactor skill", "review skill", "stocktake skills", "health scan", "skill inventory", "harness agents", "automated review", "CI/CD quality gate"
+description: "Use when optimizing, refining, improving, auditing, validating, checking AI Agent skills for quality and compliance, performing health stocktake scans, or integrating Harness AI Agents for automated quality management. Triggers on \"optimize this skill\", \"improve skill\", \"audit skill\", \"check compliance\", \"skill quality\", \"validate SKILL.md\", \"refactor skill\", \"review skill\", \"stocktake skills\", \"health scan\", \"skill inventory\", \"harness agents\", \"automated review\", \"CI/CD quality gate\""
 tags: [skill-optimization, skill-auditing, skill-refactoring, quality-check, harness-agents, automated-review, ci-cd-quality-gate, stocktake-scan, skill-factory]
 dependency:
   parent: skill-factory

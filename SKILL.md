@@ -2,7 +2,7 @@
 name: skill-factory
 version: v2.2.0
 author: skill-factory
-description: Use when creating, editing, optimizing, validating, auditing, publishing, merging, or splitting AI Agent skills and SKILL.md files. Triggers on "create a skill", "write SKILL.md", "optimize this skill", "check if compliant", "skill factory", "audit skill", "TDD for skills", "publish skill", "merge skills", "split skills", "deprecate skill", or "retire skill". A meta-skill for complex skill lifecycle management with agentskills.io standard compliance
+description: "Use when creating, editing, optimizing, validating, auditing, publishing, merging, or splitting AI Agent skills and SKILL.md files. Triggers on \"create a skill\", \"write SKILL.md\", \"optimize this skill\", \"check if compliant\", \"skill factory\", \"audit skill\", \"TDD for skills\", \"publish skill\", \"merge skills\", \"split skills\", \"deprecate skill\", or \"retire skill\". A meta-skill for complex skill lifecycle management with agentskills.io standard compliance"
 tags: [skill-factory, skill-creation, tdd-driven, skill-optimization, skill-publishing, skill-auditing, merging, splitting]
 dependency:
   parent: none

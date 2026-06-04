@@ -2,7 +2,7 @@
 name: skill-factory-assembler
 version: v2.3.0
 author: skill-factory
-description: Use when merging, splitting, combining, integrating, or restructuring multiple AI Agent skills, performing batch validation after assembly operations, or coordinating with Stocktake health scans. Triggers on "merge skills", "split skills", "combine skills", "integrate skills", "restructure skills", "skill assembly", "batch validate", "post-merge check", or "stocktake coordination"
+description: "Use when merging, splitting, combining, integrating, or restructuring multiple AI Agent skills, performing batch validation after assembly operations, or coordinating with Stocktake health scans. Triggers on \"merge skills\", \"split skills\", \"combine skills\", \"integrate skills\", \"restructure skills\", \"skill assembly\", \"batch validate\", \"post-merge check\", or \"stocktake coordination\""
 tags: [skill-merging, skill-splitting, skill-restructuring, integration, batch-validation, stocktake-coordination, ci-cd-pipeline, harness-integration, skill-factory]
 dependency:
   parent: skill-factory
