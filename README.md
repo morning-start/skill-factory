@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Project_Average-95%25-brightgreen" alt="95% Score" />
+  <img src="https://img.shields.io/badge/Project_Average-99%25-brightgreen" alt="99% Score" />
   <img src="https://img.shields.io/badge/TDD_Coverage-100%25-success" alt="TDD 100%" />
   <img src="https://img.shields.io/badge/Test_Scenarios-100-blue" alt="100 Scenarios" />
   <img src="https://img.shields.io/badge/Architecture-4_Entry_Router-informational" alt="Router" />
@@ -212,7 +212,7 @@ dependency:
 ```
 skill-factory/
 ├── SKILL.md                              ← 入口文件（路由器 ~150行）
-├── metadata.json                         ← 元数据
+├── metadata.json                         ← 项目元数据
 ├── README.md                             ← 项目说明
 ├── CHANGELOG.md                          ← 变更日志
 ├── references/                           ← 全局参考文档（不占层级）
@@ -223,8 +223,7 @@ skill-factory/
 ├── skills/                               ← Layer 1: 4 个独立子技能
 │   ├── skill-factory-creator/            ← 📦 创建器 (TDD流程+类型判定)
 │   │   ├── SKILL.md                      ← 协调器 (~575行)
-│   │   ├── references/                   ← test-scenario-guide.md
-│   │   └── scripts/                      ← 辅助脚本
+│   │   └── references/                   ← test-scenario-guide.md
 │   ├── skill-factory-processor/          ← ⚙️ 加工器+审计引擎
 │   │   ├── SKILL.md                      ← 协调器 (~574行)
 │   │   ├── references/                   ← harness-agents-guide.md, harness-integration-guide.md

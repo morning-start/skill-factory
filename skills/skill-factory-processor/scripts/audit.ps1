@@ -72,6 +72,8 @@ function Test-CSODescription {
         return @{ Score = 0; Max = $max; Issues = $issues }
     }
     $desc = ($descLine -replace '^description:\s*', '').Trim()
+    # Strip surrounding YAML quotes (single or double) for CSO matching
+    $desc = $desc -replace '^["\x27]', '' -replace '["\x27]$', ''
     $len = $desc.Length
     
     if ($desc -match '^Use when\s' -or $desc -match '\.\s*Use when\s') { $score += 5 } else {

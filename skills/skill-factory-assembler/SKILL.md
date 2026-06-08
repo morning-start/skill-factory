@@ -369,9 +369,9 @@ skills/skill-factory-assembler/
 
 | 资源 | 路径 | 用途 |
 |------|------|------|
-| 设计原则 | [../references/design-principles.md](../references/design-principles.md) | 整合模式选择 |
-| 写作规则 | [../references/writing-rules.md](../references/writing-rules.md) | R1-R14 完整规则 |
-| 最佳实践 | [../references/best-practices.md](../references/best-practices.md) | 项目知识枢纽 |
+| 设计原则 | [../../references/design-principles.md](../../references/design-principles.md) | 整合模式选择 |
+| 写作规则 | [../../references/writing-rules.md](../../references/writing-rules.md) | R1-R14 完整规则 |
+| 最佳实践 | [../../references/best-practices.md](../../references/best-practices.md) | 项目知识枢纽 |
 | **EvoSkill 评估** | [references/evoskill-eval.md](references/evoskill-eval.md) | **多候选方案生成与6维评分选优** |
 
 ---

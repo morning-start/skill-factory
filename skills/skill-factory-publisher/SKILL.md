@@ -282,7 +282,7 @@ jobs:
 > **验证策略**: 本技能采用 **validation-only** 模式 + **CI/CD 集成验证**
 > **豁免原因**: 发布流程是确定性操作（版本判定+git+tag），非创造性任务
 > **验证方式**:
-> - ✅ [scenarios.yaml](tests/scenarios/skill-factory-publisher/scenarios.yaml) — 20 个压力测试场景（发布/退役/CI/CD）
+> - ✅ [scenarios.yaml](../../tests/scenarios/skill-factory-publisher/scenarios.yaml) — 20 个压力测试场景（发布/退役/CI/CD）
 > - ✅ [harness-integration-guide.md](../skill-factory-processor/references/harness-integration-guide.md) — CI/CD 流水线自动化验证
 > - ✅ GitHub Actions workflow (`skill-auto-release.yml`) — 发布前质量门禁 (≥85%)
 > - ✅ audit.ps1 全量审计 — 项目级合规性检查
@@ -450,9 +450,9 @@ skills/skill-factory-publisher/
 
 | 资源 | 路径 |
 |------|------|
-| 设计原则 | [../references/design-principles.md](../references/design-principles.md) |
-| 最佳实践速查 | [../references/best-practices.md](../references/best-practices.md) |
-| 写作规则 | [../references/writing-rules.md](../references/writing-rules.md) |
+| 设计原则 | [../../references/design-principles.md](../../references/design-principles.md) |
+| 最佳实践速查 | [../../references/best-practices.md](../../references/best-practices.md) |
+| 写作规则 | [../../references/writing-rules.md](../../references/writing-rules.md) |
 
 ---
 

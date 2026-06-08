@@ -10,7 +10,7 @@ dependency:
   pattern: "4-Entry Router Architecture"
 meta:
   complexity: advanced
-  last_audit_date: "2026-05-27"
+  last_audit_date: "2026-05-30"
   version_history: "v1.0(unified) → v2.0(4-entry-router)"
   tdd: validation-only
   tdd_waiver_reason: "路由器型技能（Router Pattern），仅做请求分发不含具体操作逻辑。详细验证在各子技能中执行"
@@ -103,14 +103,14 @@ meta:
 ```
 skill-factory/
 ├── SKILL.md                              ← 本文件 (路由器 ~150行)
-├── examples/                             ← 示例库 (Type1/Type2)
+├── metadata.json                         ← 项目元数据
 ├── references/                           ← 全局共享参考
 │   ├── best-practices.md                 ← 知识导航枢纽
 │   ├── design-principles.md              ← 铁律+分类+三级加载系统
 │   ├── writing-rules.md                  ← R1-R14 写作规则
-│   └── routing-engine.md                 ← 路由引擎详细版
+│   └── routing-engine.md                 ← 路由引擎详细设计
 └── skills/                               ← Layer 1: 4个独立子技能
-    ├── skill-factory-creator/            ← 📦 创建 (自含 refs+scripts)
+    ├── skill-factory-creator/            ← 📦 创建 (自含 refs)
     ├── skill-factory-processor/         ← ⚙️ 加工+审计 (自含 refs+scripts+audit.ps1)
     ├── skill-factory-publisher/         ← 📤 发布+退役
     └── skill-factory-assembler/          ← 🔗 合并+拆分

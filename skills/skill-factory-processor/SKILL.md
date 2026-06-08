@@ -539,14 +539,14 @@ skills/skill-factory-processor/
 
 | 资源 | 路径 | 用途 |
 |------|------|------|
-| 全局写作规则 | [../references/writing-rules.md](../references/writing-rules.md) | R1-R14 完整规则 |
-| 技能标准 | [../references/skill-standards.md](../references/skill-standards.md) | 规范清单 + TDD 要求 |
-| 设计原则 | [../references/design-principles.md](../references/design-principles.md) | 三层铁律 + 四维分类 |
+| 全局写作规则 | [../../references/writing-rules.md](../../references/writing-rules.md) | R1-R14 完整规则 |
+| 技能标准 | [../../references/skill-standards.md](../../references/skill-standards.md) | 规范清单 + TDD 要求 |
+| 设计原则 | [../../references/design-principles.md](../../references/design-principles.md) | 三层铁律 + 四维分类 |
 | 加工策略详情 | [references/strategies.md](references/strategies.md) | 4种策略的具体操作步骤 |
 | 审计标准详情 | [references/audit-criteria.md](references/audit-criteria.md) | 评分细则 + 改进模板 |
 | Test Harness 集成 | [references/harness-integration-guide.md](references/harness-integration-guide.md) | CI/CD集成 + 自动化测试 |
 | **Harness AI Agents** | **[references/harness-agents-guide.md](references/harness-agents-guide.md)** | **⭐ 4个Agent完整Prompt模板和配置** |
-| 最佳实践导航 | [../references/best-practices.md](../references/best-practices.md) | 项目知识枢纽 |
+| 最佳实践导航 | [../../references/best-practices.md](../../references/best-practices.md) | 项目知识枢纽 |
 
 ---
 

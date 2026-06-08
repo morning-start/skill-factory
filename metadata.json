@@ -1,0 +1,19 @@
+{
+  "name": "skill-factory",
+  "version": "v2.2.0",
+  "author": "skill-factory",
+  "description": "AI Agent 技能创建工坊 — 4-Entry Router 架构 | TDD 驱动 | CI/CD 集成",
+  "architecture": "4-Entry Router",
+  "skills": [
+    "skill-factory-creator",
+    "skill-factory-processor",
+    "skill-factory-publisher",
+    "skill-factory-assembler"
+  ],
+  "testScenarios": 100,
+  "projectAverage": 88,
+  "grade": "B",
+  "tddCoverage": "100%",
+  "lastAuditDate": "2026-05-30",
+  "repository": "https://github.com/skill-factory/skill-factory"
+}

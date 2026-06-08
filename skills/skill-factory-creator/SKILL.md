@@ -207,7 +207,7 @@ intent_capture:
 
 ### 2.1 四维分类法
 
-根据 [design-principles.md](../references/design-principles.md) 的四维分类法判定类型：
+根据 [design-principles.md](../../references/design-principles.md) 的四维分类法判定类型：
 
 ```
 ┌─────────────────────────────────────────┐
@@ -257,7 +257,7 @@ intent_capture:
 
 ### 3.1 设计压力场景
 
-根据 [writing-rules.md#R8](../references/writing-rules.md) 的 TDD 方法论：
+根据 [writing-rules.md#R8](../../references/writing-rules.md) 的 TDD 方法论：
 
 ```markdown
 ## 压力场景设计原则
@@ -339,7 +339,7 @@ meta:
 
 ### 4.3 CSO Description 编写规则
 
-遵循 [writing-rules.md#R9](../references/writing-rules.md)：
+遵循 [writing-rules.md#R9](../../references/writing-rules.md)：
 
 ```
 ✅ 正确格式:
@@ -394,7 +394,7 @@ meta:
 
 ### 4.5 写作规则速查
 
-在编写过程中，始终遵循以下核心规则（来自 [writing-rules.md](../references/writing-rules.md)）：
+在编写过程中，始终遵循以下核心规则（来自 [writing-rules.md](../../references/writing-rules.md)）：
 
 | 规则 | 应用时机 | 一句话 |
 |------|---------|--------|
@@ -441,7 +441,7 @@ meta:
 /skill-factory-processor/scripts/audit.ps1 -Path ./new-skill/SKILL.md
 ```
 
-或手动对照 [skill-standards.md](../references/skill-standards.md) 的 100 分评分体系。
+或手动对照 [skill-standards.md](../../references/skill-standards.md) 的 100 分评分体系。
 
 ---
 
@@ -535,10 +535,10 @@ skills/skill-factory-creator/
 
 | 资源 | 路径 | 用途 |
 |------|------|------|
-| 全局写作规则 | [../references/writing-rules.md](../references/writing-rules.md) | R1-R14 完整规则 |
-| 设计原则 | [../references/design-principles.md](../references/design-principles.md) | 三层铁律 + 四维分类 |
-| 技能标准 | [../references/skill-standards.md](../references/skill-standards.md) | 100 分评分体系 |
-| 最佳实践导航 | [../references/best-practices.md](../references/best-practices.md) | 项目知识枢纽 |
+| 全局写作规则 | [../../references/writing-rules.md](../../references/writing-rules.md) | R1-R14 完整规则 |
+| 设计原则 | [../../references/design-principles.md](../../references/design-principles.md) | 三层铁律 + 四维分类 |
+| 技能标准 | [../../references/skill-standards.md](../../references/skill-standards.md) | 100 分评分体系 |
+| 最佳实践导航 | [../../references/best-practices.md](../../references/best-practices.md) | 项目知识枢纽 |
 | TDD 详细指南 | [references/tdd-guide.md](references/tdd-guide.md) | TDD 各阶段详细操作 |
 | 类型模板库 | [references/type-templates.md](references/type-templates.md) | Type 1-4 模板代码 |
 | **Test Scenario 指南** | **[references/test-scenario-guide.md](references/test-scenario-guide.md)** | **⭐ scenarios.yaml + acceptance-criteria 完整规范** |
